@@ -5,7 +5,3 @@
 plugins {
     id("ru.mtuci.kotlin-library-conventions")
 }
-
-dependencies {
-    api(project(":list"))
-}
