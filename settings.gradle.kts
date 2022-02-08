@@ -8,4 +8,4 @@
  */
 
 rootProject.name = "mtuci-rasp"
-include("backend", "models", "parser")
+include("backend", "core", "parser")
