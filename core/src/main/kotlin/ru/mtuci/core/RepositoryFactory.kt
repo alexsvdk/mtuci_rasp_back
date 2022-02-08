@@ -7,6 +7,6 @@ interface RepositoryFactory {
 
     fun <T : BaseDocument> createRepository(
         clazz: KClass<T>
-    ): Repository<T>
+    ): BaseRepository<T>
 
 }

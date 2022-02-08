@@ -3,5 +3,9 @@
  */
 
 plugins {
-    id("ru.mtuci.kotlin-library-conventions")
+    id("ru.mtuci.kotlin-application-conventions")
+}
+
+application {
+    mainClass.set("ru.mtuci.parser.AppKt")
 }

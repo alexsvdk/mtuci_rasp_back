@@ -2,7 +2,7 @@ package ru.mtuci.core
 
 import ru.mtuci.models.BaseDocument
 
-interface Repository<T : BaseDocument> {
+interface BaseRepository<T : BaseDocument> {
 
     fun save(doc: T): T
 

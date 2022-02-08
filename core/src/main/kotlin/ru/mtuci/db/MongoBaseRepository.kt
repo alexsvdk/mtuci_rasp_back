@@ -1,16 +1,17 @@
 package ru.mtuci.db
 
 import com.mongodb.client.MongoDatabase
-import org.litote.kmongo.*
-import ru.mtuci.core.Repository
+import org.litote.kmongo.deleteOneById
+import org.litote.kmongo.findOneById
+import ru.mtuci.core.BaseRepository
 import ru.mtuci.models.BaseDocument
 
-class MongoRepository<T : BaseDocument>(
+open class MongoBaseRepository<T : BaseDocument>(
     private val database: MongoDatabase,
     private val clazz: Class<T>
-) : Repository<T> {
+) : BaseRepository<T> {
 
-    private val collection = database.getCollection(clazz.simpleName, clazz)
+    val collection = database.getCollection(clazz.simpleName, clazz)
 
     override fun save(doc: T): T {
         return doc.apply { collection.insertOne(doc) }
@@ -27,6 +28,5 @@ class MongoRepository<T : BaseDocument>(
     override fun removeAll() {
         collection.drop()
     }
-
 
 }
