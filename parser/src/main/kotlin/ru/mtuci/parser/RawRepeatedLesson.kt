@@ -41,9 +41,9 @@ class RawRepeatedLesson(
         val repo = koin.get<TeachersRepository>()
 
         val lastName = name.substringBefore(" ")
-        val initials = name.substringAfter(" ")
+        val initials = name.substringAfter(" ").replace(" ", "")
         val firstI = initials.getOrNull(0)?.toString()
-        val fathersI = initials.getOrNull(3)?.toString()
+        val fathersI = initials.getOrNull(2)?.toString()
 
         repo.findByLastNameAndInitials(
             lastName, firstI, fathersI
@@ -57,7 +57,7 @@ class RawRepeatedLesson(
     }
 
     private fun getDiscipline(): Discipline? {
-        val name = this.name?.replace("/\\([^]]+\\)/gm".toRegex(), "") ?: return null
+        val name = this.name?.replace("\\([^]]+\\)".toRegex(), "") ?: return null
         val repo = koin.get<DisciplinesRepository>()
 
         return repo.findByLastName(name) ?: Discipline().let {

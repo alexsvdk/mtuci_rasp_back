@@ -13,11 +13,9 @@ class RegularLesson : BaseDocument() {
 
     var isDistant = false
 
-    var dateFrom: Int? = null
+    var dateFrom: Long? = null
 
-    var dateTo: Int? = null
-
-    var termStartDate: Int? = null
+    var dateTo: Long? = null
 
     var teacherId: String? = null
 

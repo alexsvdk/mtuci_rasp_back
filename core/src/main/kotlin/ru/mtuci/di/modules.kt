@@ -4,10 +4,7 @@ import org.koin.core.qualifier.TypeQualifier
 import org.koin.dsl.module
 import org.litote.kmongo.KMongo
 import ru.mtuci.core.*
-import ru.mtuci.db.MongoDisciplinesRepository
-import ru.mtuci.db.MongoGroupsRepository
-import ru.mtuci.db.MongoRepositoryFactory
-import ru.mtuci.db.MongoTeachersRepository
+import ru.mtuci.db.*
 import ru.mtuci.models.*
 
 object CoreModules {
@@ -16,15 +13,19 @@ object CoreModules {
 
         ///Group
         single<GroupsRepository> { MongoGroupsRepository(get()) }
-        single<BaseRepository<Group>>(TypeQualifier(Group::class)) { get<MongoGroupsRepository>() }
+        single<BaseRepository<Group>>(TypeQualifier(Group::class)) { get<GroupsRepository>() }
 
         ///Teachers
         single<TeachersRepository> { MongoTeachersRepository(get()) }
-        single<BaseRepository<Teacher>>(TypeQualifier(Teacher::class)) { get<MongoTeachersRepository>() }
+        single<BaseRepository<Teacher>>(TypeQualifier(Teacher::class)) { get<TeachersRepository>() }
 
         ///Disciplines
         single<DisciplinesRepository> { MongoDisciplinesRepository(get()) }
         single<BaseRepository<Discipline>>(TypeQualifier(Discipline::class)) { get<DisciplinesRepository>() }
+
+        ///Directions
+        single<DirectionsRepository> { MongoDirectionsRepository(get()) }
+        single<BaseRepository<Direction>>(TypeQualifier(Direction::class)) { get<DirectionsRepository>() }
 
         createRepo<RegularLesson>()
         createRepo<Room>()

@@ -7,11 +7,17 @@ import org.apache.poi.ss.usermodel.Row
 import org.apache.poi.ss.usermodel.Sheet
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.jsoup.Jsoup
+import ru.mtuci.core.DirectionsRepository
 import ru.mtuci.core.GroupsRepository
 import ru.mtuci.di.koin
+import ru.mtuci.models.Direction
 import ru.mtuci.models.Group
 import save
 import java.net.URL
+import java.text.SimpleDateFormat
+
+val dateRex = "[0-9]{2}.[0-9]{2}.[0-9]{4}".toRegex()
+val dateFormat = SimpleDateFormat("dd.MM.yyyy")
 
 fun main() {
     koin
@@ -22,13 +28,9 @@ fun main() {
 fun getRaspUrls(): List<String> {
     val page = Jsoup.connect("https://mtuci.ru/time-table/").get()
     val table = page.select("body > div.content > div > div:nth-child(2) > div > ul > li")
-    return table
-        .map {
-            it.selectFirst("a")?.attr("href")
-        }
-        .filterNotNull()
-        .filter { it.endsWith(".xlsx") }
-        .toList()
+    return table.map {
+        it.selectFirst("a")?.attr("href")
+    }.filterNotNull().filter { it.endsWith(".xlsx") }.toList()
 }
 
 fun processTable(url: String) {
@@ -47,11 +49,29 @@ fun processSheet(sheet: Sheet) {
     val str = sheet.getRow(5).getCell(0).stringCellValue;
     if (!str.contains("Расписание", ignoreCase = true)) {
         print("Skipping: $str")
-        return;
+        return
     }
 
     val group = getGroupByName(sheet.sheetName)
+    val direction = getDirectionByName(sheet.getRow(9).getCell(0).stringCellValue)
 
+    group.directionId = direction.id
+    group.semester = sheet.getRow(6).getCell(0).stringCellValue.filter { it.isDigit() }.toIntOrNull()
+    val matches = dateRex.findAll(sheet.getRow(8).getCell(0).stringCellValue).map { it.value }.toList()
+    matches.firstOrNull()?.let {
+        group.termStartDate = dateFormat.parse(it).time
+    }
+    matches.elementAtOrNull(1)?.let {
+        group.termEndDate = dateFormat.parse(it).time
+    }
+
+    group.save()
+
+
+    if (direction.codeName == null) {
+        direction.codeName = group.name?.filter { !it.isDigit() }
+        direction.save()
+    }
 
     val rawLessons = mutableListOf<RawRepeatedLesson>()
 
@@ -91,8 +111,7 @@ fun parseRawLessons(row: Row, day: Int): List<RawRepeatedLesson> {
             name = row.getCell(7).stringCellValue.trim()
             teacher = row.getCell(8).stringCellValue.trim()
             type = row.getCell(9).stringCellValue.trim()
-            dist = row.getCell(10)
-                .stringCellValue.trim() == "дист"
+            dist = row.getCell(10).stringCellValue.trim() == "дист"
             num = row.getCell(11).numericCellValue.toInt()
             sec = true
         }
@@ -103,6 +122,17 @@ fun parseRawLessons(row: Row, day: Int): List<RawRepeatedLesson> {
     return mutableListOf<RawRepeatedLesson>().apply {
         if (raw1?.name?.isNotEmpty() == true) add(raw1)
         if (raw2?.name?.isNotEmpty() == true) add(raw2)
+    }
+}
+
+fun getDirectionByName(name: String): Direction {
+    val code = name.substringBefore(" ")
+    val repo = koin.get<DirectionsRepository>()
+
+    return repo.findByCode(code) ?: Direction().let {
+        it.code = code
+        it.name = name.substringAfter(" ")
+        repo.save(it)
     }
 }
 

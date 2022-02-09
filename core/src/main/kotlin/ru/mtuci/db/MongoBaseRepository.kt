@@ -14,6 +14,7 @@ open class MongoBaseRepository<T : BaseDocument>(
     val collection = database.getCollection(clazz.simpleName, clazz)
 
     override fun save(doc: T): T {
+        doc.id?.let(collection::deleteOneById)
         return doc.apply { collection.insertOne(doc) }
     }
 
