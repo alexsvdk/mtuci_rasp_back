@@ -27,13 +27,16 @@ object CoreModules {
         single<DirectionsRepository> { MongoDirectionsRepository(get()) }
         single<BaseRepository<Direction>>(TypeQualifier(Direction::class)) { get<DirectionsRepository>() }
 
-        createRepo<RegularLesson>()
+        ///Lessons
+        single<RegularLessonsRepository> { MongoRegularLessonsRepository(get()) }
+        single<BaseRepository<RegularLesson>>(TypeQualifier(RegularLesson::class)) { get<RegularLessonsRepository>() }
+
         createRepo<Room>()
     }
 
     val mongo = module {
         single { KMongo.createClient().getDatabase("mtuci-rasp") }
-        single <RepositoryFactory> { MongoRepositoryFactory(get()) }
+        single<RepositoryFactory> { MongoRepositoryFactory(get()) }
     }
 
 }

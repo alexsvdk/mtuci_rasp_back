@@ -9,6 +9,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.jsoup.Jsoup
 import ru.mtuci.core.DirectionsRepository
 import ru.mtuci.core.GroupsRepository
+import ru.mtuci.core.RegularLessonsRepository
 import ru.mtuci.di.koin
 import ru.mtuci.models.Direction
 import ru.mtuci.models.Group
@@ -19,8 +20,10 @@ import java.text.SimpleDateFormat
 val dateRex = "[0-9]{2}.[0-9]{2}.[0-9]{4}".toRegex()
 val dateFormat = SimpleDateFormat("dd.MM.yyyy")
 
+val lessonsRepo = koin.get<RegularLessonsRepository>()
+
 fun main() {
-    koin
+    lessonsRepo.removeAll()
     val urls = getRaspUrls()
     urls.forEach(::processTable)
 }
@@ -84,8 +87,13 @@ fun processSheet(sheet: Sheet) {
     val lessons = rawLessons.map { it.buildLesson() }
 
     lessons.forEach {
-        group.id?.let { it1 -> it.groupIds.add(it1) }
-        it.save()
+        val trueLesson = lessonsRepo.findClone(it) ?: it
+        group.id?.let { it1 ->
+            if (!trueLesson.groupIds.contains(it1)) {
+                trueLesson.groupIds.add(it1)
+            }
+        }
+        trueLesson.save()
     }
 
 }
