@@ -1,6 +1,7 @@
 package ru.mtuci.parser
 
 import ru.mtuci.core.DisciplinesRepository
+import ru.mtuci.core.RoomsRepository
 import ru.mtuci.core.TeachersRepository
 import ru.mtuci.di.koin
 import ru.mtuci.models.*
@@ -8,6 +9,8 @@ import ru.mtuci.models.*
 private val innerRex = "\\([^]]+\\)".toRegex()
 private val ends = listOf("по", "до")
 private val starts = listOf("с")
+private val roomRex1 = "ауд[.] +[A-Z,0-9,a-z,а-я, А-Я, -]{2,7} *".toRegex()
+private val roomRex2 = "А-[0-9]{2,5}".toRegex()
 
 class RawRepeatedLesson(
     var day: Int
@@ -34,6 +37,7 @@ class RawRepeatedLesson(
         it.lessonNum = num
         it.dateFrom = getStartTime()
         it.dateTo = getEndTime()
+        it.roomId = getRooms()?.id
     }
 
     private fun getLessonType() = when (type?.lowercase()) {
@@ -62,11 +66,31 @@ class RawRepeatedLesson(
     }
 
     private fun getDiscipline(): Discipline? {
-        val name = this.name?.replace(innerRex, "") ?: return null
+        var name = this.name?.replace(innerRex, "") ?: return null
+        name = name.replace("\n", " ")
+            .replace(roomRex1, "")
+            .replace(roomRex2, "")
+
         val repo = koin.get<DisciplinesRepository>()
 
         return repo.findByLastName(name) ?: Discipline().let {
-            it.name = name
+            it.name = name.trim()
+            repo.save(it)
+        }
+    }
+
+    private fun getRooms(): Room? {
+        val name = this.name?.lowercase() ?: return null
+        var room = roomRex1.findAll(name).lastOrNull()?.value?.replace("ауд.", "")?.trim()
+        if (room == null) room = roomRex2.findAll(name).lastOrNull()?.value?.trim()
+        if (room == null) {
+            return null
+        }
+
+        val repo = koin.get<RoomsRepository>()
+        return repo.findByNumber(room) ?: Room().let {
+            it.number = room
+            it.floor = room.filter { it.isDigit() }.toIntOrNull()?.let { if (it > 100) (it / 100) else 1 }
             repo.save(it)
         }
     }

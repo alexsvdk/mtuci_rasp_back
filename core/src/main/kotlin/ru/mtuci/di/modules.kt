@@ -31,7 +31,9 @@ object CoreModules {
         single<RegularLessonsRepository> { MongoRegularLessonsRepository(get()) }
         single<BaseRepository<RegularLesson>>(TypeQualifier(RegularLesson::class)) { get<RegularLessonsRepository>() }
 
-        createRepo<Room>()
+        ///Rooms
+        single<RoomsRepository> { MongoRoomsRepository(get()) }
+        single<BaseRepository<Room>>(TypeQualifier(Room::class)) { get<RoomsRepository>() }
     }
 
     val mongo = module {
@@ -39,10 +41,4 @@ object CoreModules {
         single<RepositoryFactory> { MongoRepositoryFactory(get()) }
     }
 
-}
-
-private inline fun <reified T : BaseDocument> org.koin.core.module.Module.createRepo() = single(
-    TypeQualifier(T::class)
-) {
-    get<RepositoryFactory>().createRepository(T::class)
 }
