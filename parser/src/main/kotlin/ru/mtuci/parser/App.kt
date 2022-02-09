@@ -18,6 +18,7 @@ import java.net.URL
 import java.text.SimpleDateFormat
 
 val dateRex = "[0-9]{2}.[0-9]{2}.[0-9]{4}".toRegex()
+val dateFRex = "[0-9]{2}.[0-9]{2}.".toRegex()
 val dateFormat = SimpleDateFormat("dd.MM.yyyy")
 
 val lessonsRepo = koin.get<RegularLessonsRepository>()
@@ -84,7 +85,10 @@ fun processSheet(sheet: Sheet) {
         )
     }
 
-    val lessons = rawLessons.map { it.buildLesson() }
+    val lessons = rawLessons.map {
+        it.group = group
+        it.buildLesson()
+    }
 
     lessons.forEach {
         val trueLesson = lessonsRepo.findClone(it) ?: it
