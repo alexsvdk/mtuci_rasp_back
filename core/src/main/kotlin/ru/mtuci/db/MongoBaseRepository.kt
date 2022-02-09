@@ -22,6 +22,10 @@ open class MongoBaseRepository<T : BaseDocument>(
         return collection.findOneById(id)
     }
 
+    override fun getAll(): Iterable<T> {
+        return collection.find()
+    }
+
     override fun remove(id: String): Boolean {
         return collection.deleteOneById(id).deletedCount > 0
     }

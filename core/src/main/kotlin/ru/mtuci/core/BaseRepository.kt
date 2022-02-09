@@ -8,6 +8,8 @@ interface BaseRepository<T : BaseDocument> {
 
     fun get(id: String): T?
 
+    fun getAll(): Iterable<T>
+
     fun getMany(ids: List<String>) = ids.map { get(it) }.filterNotNull().toList();
 
     fun remove(id: String): Boolean
