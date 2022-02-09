@@ -66,15 +66,16 @@ class RawRepeatedLesson(
     }
 
     private fun getDiscipline(): Discipline? {
-        var name = this.name?.replace(innerRex, "") ?: return null
-        name = name.replace("\n", " ")
+        var newName = this.name?.replace(innerRex, "") ?: return null
+        newName = newName.replace("\n", " ")
             .replace(roomRex1, "")
             .replace(roomRex2, "")
+            .trim();
 
         val repo = koin.get<DisciplinesRepository>()
 
-        return repo.findByLastName(name) ?: Discipline().let {
-            it.name = name.trim()
+        return repo.findByName(newName) ?: Discipline().let {
+            it.name = newName
             repo.save(it)
         }
     }
