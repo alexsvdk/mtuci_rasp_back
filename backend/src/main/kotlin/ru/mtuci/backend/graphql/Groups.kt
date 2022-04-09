@@ -11,6 +11,8 @@ class GroupsQuery : Query {
 
     private val repo: GroupsRepository = koin.get()
 
+    fun groupById(id: String) = repo.get(id)
+
     fun findGroups(
         search: String? = null,
         directionId: String? = null,

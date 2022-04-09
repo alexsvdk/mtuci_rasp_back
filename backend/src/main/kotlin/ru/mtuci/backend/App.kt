@@ -7,8 +7,6 @@ import org.springframework.boot.runApplication
 @SpringBootApplication
 open class Application
 
-
-
 fun main() {
     runApplication<Application>()
 }

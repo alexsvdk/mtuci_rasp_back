@@ -11,6 +11,8 @@ class RoomsQuery : Query {
 
     private val repo: RoomsRepository = koin.get()
 
+    fun roomById(id: String) = repo.get(id)
+
     fun findRooms(
         search: String? = null,
         offset: Int? = 0,

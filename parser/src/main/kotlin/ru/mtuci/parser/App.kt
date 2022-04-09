@@ -24,8 +24,8 @@ val dateFormat = SimpleDateFormat("dd.MM.yyyy")
 val lessonsRepo = koin.get<RegularLessonsRepository>()
 
 fun main() {
-    lessonsRepo.removeAll()
     val urls = getRaspUrls()
+    lessonsRepo.removeAll()
     urls.forEach(::processTable)
 }
 
@@ -49,57 +49,60 @@ fun processTable(url: String) {
 }
 
 fun processSheet(sheet: Sheet) {
-
-    val str = sheet.getRow(5).getCell(0).stringCellValue;
-    if (!str.contains("Расписание", ignoreCase = true)) {
-        print("Skipping: $str")
-        return
-    }
-
-    val group = getGroupByName(sheet.sheetName)
-    val direction = getDirectionByName(sheet.getRow(9).getCell(0).stringCellValue)
-
-    group.directionId = direction.id
-    group.semester = sheet.getRow(6).getCell(0).stringCellValue.filter { it.isDigit() }.toIntOrNull()
-    val matches = dateRex.findAll(sheet.getRow(8).getCell(0).stringCellValue).map { it.value }.toList()
-    matches.firstOrNull()?.let {
-        group.termStartDate = dateFormat.parse(it).time
-    }
-    matches.elementAtOrNull(1)?.let {
-        group.termEndDate = dateFormat.parse(it).time
-    }
-
-    group.save()
-
-
-    if (direction.codeName == null) {
-        direction.codeName = group.name?.filter { !it.isDigit() }
-        direction.save()
-    }
-
-    val rawLessons = mutableListOf<RawRepeatedLesson>()
-
-    for (day in 0..5) for (lessonNum in 0..4) {
-        rawLessons.addAll(
-            parseRawLessons(sheet.getRow(13 + 6 * day + lessonNum), day),
-        )
-    }
-
-    val lessons = rawLessons.map {
-        it.group = group
-        it.buildLesson()
-    }
-
-    lessons.forEach {
-        val trueLesson = lessonsRepo.findClone(it) ?: it
-        group.id?.let { it1 ->
-            if (!trueLesson.groupIds.contains(it1)) {
-                trueLesson.groupIds.add(it1)
-            }
+    try {
+        val str = sheet.getRow(5).getCell(0).stringCellValue;
+        if (!str.contains("Расписание", ignoreCase = true)) {
+            print("Skipping: $str")
+            return
         }
-        trueLesson.save()
-    }
 
+        val group = getGroupByName(sheet.sheetName)
+        val direction = getDirectionByName(sheet.getRow(9).getCell(0).stringCellValue)
+
+        group.directionId = direction.id
+        group.semester = sheet.getRow(6).getCell(0).stringCellValue.filter { it.isDigit() }.toIntOrNull()
+        val matches = dateRex.findAll(sheet.getRow(8).getCell(0).stringCellValue).map { it.value }.toList()
+        matches.firstOrNull()?.let {
+            group.termStartDate = dateFormat.parse(it).time
+        }
+        matches.elementAtOrNull(1)?.let {
+            group.termEndDate = dateFormat.parse(it).time
+        }
+
+        group.save()
+
+
+        if (direction.codeName == null) {
+            direction.codeName = group.name?.filter { !it.isDigit() }
+            direction.save()
+        }
+
+        val rawLessons = mutableListOf<RawRepeatedLesson>()
+
+        for (day in 0..5) for (lessonNum in 0..4) {
+            rawLessons.addAll(
+                parseRawLessons(sheet.getRow(13 + 6 * day + lessonNum), day),
+            )
+        }
+
+        val lessons = rawLessons.map {
+            it.group = group
+            it.buildLesson()
+        }
+
+        lessons.forEach {
+            val trueLesson = lessonsRepo.findClone(it) ?: it
+            group.id?.let { it1 ->
+                if (!trueLesson.groupIds.contains(it1)) {
+                    trueLesson.groupIds.add(it1)
+                }
+            }
+            trueLesson.save()
+        }
+
+    } catch (e: Exception) {
+        e.printStackTrace()
+    }
 }
 
 fun parseRawLessons(row: Row, day: Int): List<RawRepeatedLesson> {

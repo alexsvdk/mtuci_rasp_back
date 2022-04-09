@@ -11,6 +11,8 @@ class DisciplinesQuery : Query {
 
     private val repo: DisciplinesRepository = koin.get()
 
+    fun disciplineById(id: String) = repo.get(id)
+
     fun findDisciplines(
         search: String? = null,
         offset: Int? = 0,

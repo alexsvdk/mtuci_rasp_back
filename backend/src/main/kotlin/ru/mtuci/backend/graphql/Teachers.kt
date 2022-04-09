@@ -11,6 +11,8 @@ class TeachersQuery : Query {
 
     private val repo: TeachersRepository = koin.get()
 
+    fun teacherById(id: String) = repo.get(id)
+
     fun findTeachers(
         search: String? = null,
         offset: Int? = 0,

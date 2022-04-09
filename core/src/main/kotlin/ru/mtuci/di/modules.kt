@@ -3,6 +3,7 @@ package ru.mtuci.di
 import org.koin.core.qualifier.TypeQualifier
 import org.koin.dsl.module
 import org.litote.kmongo.KMongo
+import ru.mtuci.Config
 import ru.mtuci.core.*
 import ru.mtuci.db.*
 import ru.mtuci.models.*
@@ -37,7 +38,7 @@ object CoreModules {
     }
 
     val mongo = module {
-        single { KMongo.createClient().getDatabase("mtuci-rasp") }
+        single { KMongo.createClient(Config.MONGO_URL).getDatabase("mtuci-rasp") }
         single<RepositoryFactory> { MongoRepositoryFactory(get()) }
     }
 
