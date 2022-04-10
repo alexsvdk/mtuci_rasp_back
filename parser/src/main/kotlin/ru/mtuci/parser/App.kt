@@ -25,13 +25,15 @@ val lessonsRepo = koin.get<RegularLessonsRepository>()
 
 fun main() {
     val urls = getRaspUrls()
-    lessonsRepo.removeAll()
-    urls.forEach(::processTable)
+    if (urls.isNotEmpty()) {
+        lessonsRepo.removeAll()
+        urls.forEach(::processTable)
+    }
 }
 
 fun getRaspUrls(): List<String> {
     val page = Jsoup.connect("https://mtuci.ru/time-table/").get()
-    val table = page.select("body > div.content > div > div:nth-child(2) > div > ul > li")
+    val table = page.select("body > div.content > div > div:nth-child(2) > div > li")
     return table.map {
         it.selectFirst("a")?.attr("href")
     }.filterNotNull().filter { it.endsWith(".xlsx") }.toList()
@@ -52,7 +54,7 @@ fun processSheet(sheet: Sheet) {
     try {
         val str = sheet.getRow(5).getCell(0).stringCellValue;
         if (!str.contains("Расписание", ignoreCase = true)) {
-            print("Skipping: $str")
+            println("Skipping: $str")
             return
         }
 
@@ -99,6 +101,8 @@ fun processSheet(sheet: Sheet) {
             }
             trueLesson.save()
         }
+
+        println("Processed: $str")
 
     } catch (e: Exception) {
         e.printStackTrace()
