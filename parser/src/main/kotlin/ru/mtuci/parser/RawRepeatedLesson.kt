@@ -9,8 +9,12 @@ import ru.mtuci.models.*
 private val innerRex = "\\([^]]+\\)".toRegex()
 private val ends = listOf("по", "до")
 private val starts = listOf("с")
-private val roomRex1 = "ауд[.] +[A-Z,0-9,a-z,а-я, А-Я, -]{2,7} *".toRegex()
-private val roomRex2 = "А-[0-9]{2,5}".toRegex()
+private val roomRex1 = "ауд[.] +[A-Z,0-9,a-z,а-я, А-Я, -]{2,7} *".toRegex(
+    setOf(RegexOption.IGNORE_CASE)
+)
+private val roomRex2 = "А-[0-9]{2,5}".toRegex(
+    setOf(RegexOption.IGNORE_CASE)
+)
 
 class RawRepeatedLesson(
     var day: Int
