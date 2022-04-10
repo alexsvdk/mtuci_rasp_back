@@ -1,0 +1,18 @@
+package ru.mtuci.parser.rasp
+
+import java.text.SimpleDateFormat
+
+object RaspParserConstants {
+    val dateRex = "[0-9]{2}.[0-9]{2}.[0-9]{4}".toRegex()
+    val dateFormat = SimpleDateFormat("dd.MM.yyyy")
+    val innerRex = "\\([^]]+\\)".toRegex()
+    val ends = listOf("по", "до")
+    val starts = listOf("с")
+    val roomRex1 = "ауд[.] +[A-Z,0-9,a-z,а-я, А-Я, -]{2,7} *".toRegex(
+        setOf(RegexOption.IGNORE_CASE)
+    )
+    val roomRex2 = "А-[0-9]{2,5}".toRegex(
+        setOf(RegexOption.IGNORE_CASE)
+    )
+    val dateFRex = "[0-9]{2}.[0-9]{2}.".toRegex()
+}

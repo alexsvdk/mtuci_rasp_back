@@ -1,20 +1,19 @@
-package ru.mtuci.parser
+package ru.mtuci.parser.rasp
 
 import ru.mtuci.core.DisciplinesRepository
 import ru.mtuci.core.RoomsRepository
 import ru.mtuci.core.TeachersRepository
 import ru.mtuci.di.koin
 import ru.mtuci.models.*
+import ru.mtuci.parser.rasp.RaspParserConstants.dateFRex
+import ru.mtuci.parser.rasp.RaspParserConstants.dateFormat
+import ru.mtuci.parser.rasp.RaspParserConstants.dateRex
+import ru.mtuci.parser.rasp.RaspParserConstants.ends
+import ru.mtuci.parser.rasp.RaspParserConstants.innerRex
+import ru.mtuci.parser.rasp.RaspParserConstants.roomRex1
+import ru.mtuci.parser.rasp.RaspParserConstants.roomRex2
+import ru.mtuci.parser.rasp.RaspParserConstants.starts
 
-private val innerRex = "\\([^]]+\\)".toRegex()
-private val ends = listOf("по", "до")
-private val starts = listOf("с")
-private val roomRex1 = "ауд[.] +[A-Z,0-9,a-z,а-я, А-Я, -]{2,7} *".toRegex(
-    setOf(RegexOption.IGNORE_CASE)
-)
-private val roomRex2 = "А-[0-9]{2,5}".toRegex(
-    setOf(RegexOption.IGNORE_CASE)
-)
 
 class RawRepeatedLesson(
     var day: Int
