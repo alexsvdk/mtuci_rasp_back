@@ -47,7 +47,6 @@ class MongoRegularLessonsRepository(database: MongoDatabase) :
                 RegularLesson::disciplineId eq lesson.disciplineId,
                 RegularLesson::teacherId eq lesson.teacherId,
                 RegularLesson::roomId eq lesson.roomId,
-                RegularLesson::isDistant eq lesson.isDistant
             )
         }
     }

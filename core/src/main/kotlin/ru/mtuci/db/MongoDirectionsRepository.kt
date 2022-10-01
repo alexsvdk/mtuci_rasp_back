@@ -14,4 +14,8 @@ class MongoDirectionsRepository(database: MongoDatabase) :
         return collection.findOne { Direction::code eq code }
     }
 
+    override fun findByName(name: String): Direction? {
+        return collection.findOne { Direction::name eq name }
+    }
+
 }

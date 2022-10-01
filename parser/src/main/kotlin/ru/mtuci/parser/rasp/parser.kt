@@ -24,7 +24,7 @@ fun parseRasp() {
             lessonsRepo.removeAll()
             urls.forEach(::processTable)
         }
-    }catch (e: Exception){
+    } catch (e: Exception) {
         e.printStackTrace()
     }
 }
@@ -46,7 +46,6 @@ private fun processTable(url: String) {
         val table = XSSFWorkbook(URL(url).openStream())
         for (n in 0 until table.numberOfSheets) {
             processSheet(table.getSheetAt(n))
-
         }
     } catch (e: Exception) {
         e.printStackTrace()
@@ -55,18 +54,17 @@ private fun processTable(url: String) {
 
 private fun processSheet(sheet: Sheet) {
     try {
-        val str = sheet.getRow(5).getCell(0).stringCellValue;
+        val str = sheet.getRow(7).getCell(0).stringCellValue;
         if (!str.contains("Расписание", ignoreCase = true)) {
             println("Skipping: $str")
             return
         }
 
-        val group = getGroupByName(sheet.sheetName)
-        val direction = getDirectionByName(sheet.getRow(9).getCell(0).stringCellValue)
+        val group = getGroupByName(sheet.getRow(11).getCell(0).stringCellValue)
+        val direction = getDirectionByName(sheet.getRow(10).getCell(0).stringCellValue)
 
-        group.directionId = direction.id
-        group.semester = sheet.getRow(6).getCell(0).stringCellValue.filter { it.isDigit() }.toIntOrNull()
-        val matches = dateRex.findAll(sheet.getRow(8).getCell(0).stringCellValue).map { it.value }.toList()
+        group.directionId = direction?.id
+        val matches = dateRex.findAll(sheet.getRow(12).getCell(0).stringCellValue).map { it.value }.toList()
         matches.firstOrNull()?.let {
             group.termStartDate = dateFormat.parse(it).time
         }
@@ -76,17 +74,11 @@ private fun processSheet(sheet: Sheet) {
 
         group.save()
 
-
-        if (direction.codeName == null) {
-            direction.codeName = group.name?.filter { !it.isDigit() }
-            direction.save()
-        }
-
         val rawLessons = mutableListOf<RawRepeatedLesson>()
 
         for (day in 0..5) for (lessonNum in 0..4) {
             rawLessons.addAll(
-                parseRawLessons(sheet.getRow(13 + 6 * day + lessonNum), day),
+                parseRawLessons(sheet.getRow(16 + 6 * day + lessonNum), day),
             )
         }
 
@@ -105,7 +97,7 @@ private fun processSheet(sheet: Sheet) {
             trueLesson.save()
         }
 
-        println("Processed: $str")
+        println("Group: ${group.name}, Lessons: ${lessons.size}")
 
     } catch (e: Exception) {
         e.printStackTrace()
@@ -114,16 +106,28 @@ private fun processSheet(sheet: Sheet) {
 
 private fun parseRawLessons(row: Row, day: Int): List<RawRepeatedLesson> {
 
+    val lessonNum = try {
+        try {
+            row.getCell(1).numericCellValue.toInt()
+        } catch (_: Exception) {
+            row.getCell(1).stringCellValue.toInt()
+        }
+    } catch (e: Exception) {
+        e.printStackTrace()
+        null
+    }
+
     //left
     val raw1 = try {
         RawRepeatedLesson(day).apply {
             name = row.getCell(6).stringCellValue.trim()
-            teacher = row.getCell(5).stringCellValue.trim()
-            type = row.getCell(4).stringCellValue.trim()
-            dist = row.getCell(3).stringCellValue.trim() == "дист"
-            num = row.getCell(1).numericCellValue.toInt()
+            teacher = row.getCell(5)?.stringCellValue?.trim()
+            type = row.getCell(4)?.stringCellValue?.trim()
+            room = row.getCell(3)?.stringCellValue?.trim()
+            num = lessonNum
         }
     } catch (e: Exception) {
+        e.printStackTrace()
         null
     }
 
@@ -131,13 +135,13 @@ private fun parseRawLessons(row: Row, day: Int): List<RawRepeatedLesson> {
     val raw2 = try {
         RawRepeatedLesson(day + 7).apply {
             name = row.getCell(7).stringCellValue.trim()
-            teacher = row.getCell(8).stringCellValue.trim()
-            type = row.getCell(9).stringCellValue.trim()
-            dist = row.getCell(10).stringCellValue.trim() == "дист"
-            num = row.getCell(11).numericCellValue.toInt()
-            sec = true
+            teacher = row.getCell(8)?.stringCellValue?.trim()
+            type = row.getCell(9)?.stringCellValue?.trim()
+            room = row.getCell(10)?.stringCellValue?.trim()
+            num = lessonNum
         }
     } catch (e: Exception) {
+        e.printStackTrace()
         null
     }
 
@@ -147,21 +151,17 @@ private fun parseRawLessons(row: Row, day: Int): List<RawRepeatedLesson> {
     }
 }
 
-private fun getDirectionByName(name: String): Direction {
-    val code = name.substringBefore(" ")
+private fun getDirectionByName(name: String): Direction? {
     val repo = koin.get<DirectionsRepository>()
-
-    return repo.findByCode(code) ?: Direction().let {
-        it.code = code
-        it.name = name.substringAfter(" ")
-        repo.save(it)
-    }
+    val name = name.substringAfter("Направление").substringBefore("\"").trimIndent()
+    return repo.findByName(name)
 }
 
 private fun getGroupByName(name: String): Group {
+    val trueName = name.replace("Группа", "").trim()
     val repo = koin.get<GroupsRepository>()
-    return repo.findByName(name) ?: Group().let {
-        it.name = name
+    return repo.findByName(trueName) ?: Group().let {
+        it.name = trueName
         repo.save(it)
     }
 }

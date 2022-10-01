@@ -5,5 +5,6 @@ enum class LessonType {
     PRACTICE,
     LABORATORY,
     EXAM,
+    SPORT,
     UNKNOWN,
 }

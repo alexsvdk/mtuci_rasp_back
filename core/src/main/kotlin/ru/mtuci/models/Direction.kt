@@ -6,6 +6,8 @@ class Direction : BaseDocument() {
 
     var name: String? = null
 
+    var subname: String? = null
+
     var codeName: String? = null
 
 }

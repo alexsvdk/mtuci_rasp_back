@@ -10,16 +10,12 @@ import ru.mtuci.di.koin
 class RegularLesson : BaseDocument() {
 
     var lessonType = LessonType.UNKNOWN
-
-    var isDistant = false
-
     var dateFrom: Long? = null
-
     var dateTo: Long? = null
-
     var teacherId: String? = null
+    var tags = mutableListOf<String>()
 
-    @GraphQLDescription("Day in two weeks")
+    @GraphQLDescription("Day in two weeks [0-13]")
     var tweekDay: Int? = null
 
     @GraphQLDescription("Lesson number in day")

@@ -8,11 +8,6 @@ object RaspParserConstants {
     val innerRex = "\\([^]]+\\)".toRegex()
     val ends = listOf("по", "до")
     val starts = listOf("с")
-    val roomRex1 = "ауд[.] +[A-Z,0-9,a-z,а-я, А-Я, -]{2,7} *".toRegex(
-        setOf(RegexOption.IGNORE_CASE)
-    )
-    val roomRex2 = "А-[0-9]{2,5}".toRegex(
-        setOf(RegexOption.IGNORE_CASE)
-    )
     val dateFRex = "[0-9]{2}.[0-9]{2}.".toRegex()
+    val fioRex = "([a-zA-ZА-Яа-я,ё]*) ([a-zA-ZА-Яа-я,ё]).([a-zA-ZА-Яа-я,ё]).".toRegex()
 }

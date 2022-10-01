@@ -14,8 +14,6 @@ class Group : BaseDocument() {
 
     var termEndDate: Long? = null
 
-    var semester: Int? = null
-
     var directionId: String? = null
 
     @JsonIgnore

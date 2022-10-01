@@ -1,9 +1,16 @@
 package ru.mtuci.models
 
-class Room: BaseDocument() {
+import com.expediagroup.graphql.generator.annotations.GraphQLDescription
 
-    var number: String? = null;
+class Room : BaseDocument() {
 
-    var floor: Int? = null;
+    @GraphQLDescription("Номер аудитории")
+    var number: String? = null
+
+    @GraphQLDescription("Этаж аудитории")
+    var floor: Int? = null
+
+    @GraphQLDescription("Локация аудитории")
+    var location: RoomLocation? = null
 
 }
