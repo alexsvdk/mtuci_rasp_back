@@ -8,6 +8,7 @@ BACKEND_SERVICE_NAME="mtuci-rasp-backend"
 
 echo "Building projects"
 ./gradlew -p parser jar buildJob
+./gradlew -p ics_backend buildFatJar buildService
 ./gradlew -p backend bootJar buildService
 
 echo "Stopping service"

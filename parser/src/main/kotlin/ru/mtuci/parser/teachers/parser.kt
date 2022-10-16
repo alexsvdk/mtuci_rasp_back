@@ -1,6 +1,7 @@
 package ru.mtuci.parser.teachers
 
 import org.jsoup.Jsoup
+import org.slf4j.LoggerFactory
 import ru.mtuci.core.TeachersRepository
 import ru.mtuci.di.koin
 import save
@@ -8,11 +9,15 @@ import save
 private val nameRex =
     "([А-Я])([а-я]+) ([А-Я])([а-я]+) ([А-Я])([а-я]+)".toRegex()
 
+val logger by lazy { LoggerFactory.getLogger("TeachersParser") }
+
 fun parseTeachers() {
     try {
+        logger.info("TeachersParser parsing started")
         val urls = getRaspUrls()
         val names = urls.map(::processUrl).flatten().toSet()
         publishNames(names)
+        logger.info("TeachersParser parsing finished")
     } catch (e: Exception) {
         e.printStackTrace()
     }

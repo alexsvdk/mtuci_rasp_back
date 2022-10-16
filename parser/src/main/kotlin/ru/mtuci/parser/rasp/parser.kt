@@ -4,6 +4,7 @@ import org.apache.poi.ss.usermodel.Row
 import org.apache.poi.ss.usermodel.Sheet
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.jsoup.Jsoup
+import org.slf4j.LoggerFactory
 import ru.mtuci.core.DirectionsRepository
 import ru.mtuci.core.GroupsRepository
 import ru.mtuci.core.RegularLessonsRepository
@@ -17,13 +18,18 @@ import java.net.URL
 
 private val lessonsRepo = koin.get<RegularLessonsRepository>()
 
+val logger by lazy { LoggerFactory.getLogger("RaspParser") }
+
 fun parseRasp() {
     try {
+        logger.info ("Rasp parsing started")
         val urls = getRaspUrls()
+        logger.info ("Found ${urls.size} sheets")
         if (urls.isNotEmpty()) {
             lessonsRepo.removeAll()
             urls.forEach(::processTable)
         }
+        logger.info ("Rasp parsing finished")
     } catch (e: Exception) {
         e.printStackTrace()
     }
@@ -31,7 +37,7 @@ fun parseRasp() {
 
 private fun getRaspUrls(): List<String> {
     val page = Jsoup.connect("https://mtuci.ru/time-table/").get()
-    val table = page.select("body > div.content > div > div:nth-child(2) > div > li")
+    val table = page.select("li > h4 > a")
     return table.map {
         it.selectFirst("a")?.attr("href")
     }.filterNotNull().filter { it.endsWith(".xlsx") }.toList()
@@ -48,7 +54,7 @@ private fun processTable(url: String) {
             processSheet(table.getSheetAt(n))
         }
     } catch (e: Exception) {
-        e.printStackTrace()
+        logger.error(e.message, e)
     }
 }
 
@@ -56,11 +62,13 @@ private fun processSheet(sheet: Sheet) {
     try {
         val str = sheet.getRow(7).getCell(0).stringCellValue;
         if (!str.contains("Расписание", ignoreCase = true)) {
-            println("Skipping: $str")
+            logger.info ("Skipping: $str")
             return
         }
 
         val group = getGroupByName(sheet.getRow(11).getCell(0).stringCellValue)
+
+        logger.info ("Parsing ${group.name}")
         val direction = getDirectionByName(sheet.getRow(10).getCell(0).stringCellValue)
 
         group.directionId = direction?.id
@@ -96,11 +104,8 @@ private fun processSheet(sheet: Sheet) {
             }
             trueLesson.save()
         }
-
-        println("Group: ${group.name}, Lessons: ${lessons.size}")
-
     } catch (e: Exception) {
-        e.printStackTrace()
+        logger.error(e.message, e)
     }
 }
 

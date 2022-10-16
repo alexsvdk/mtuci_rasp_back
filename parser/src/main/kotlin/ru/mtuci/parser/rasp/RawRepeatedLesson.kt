@@ -53,9 +53,9 @@ class RawRepeatedLesson(
         val match = RaspParserConstants.fioRex.find(name)
 
         if (match != null) {
-            val lastName = match.groups[0]!!.value
-            val firstI = match.groups[1]!!.value
-            val fathersI = match.groups[2]!!.value
+            val lastName = match.groups[1]!!.value
+            val firstI = match.groups[2]!!.value
+            val fathersI = match.groups[3]!!.value
             repo.findByLastNameAndInitials(
                 lastName, firstI, fathersI
             ) ?: Teacher().let {

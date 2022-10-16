@@ -6,6 +6,7 @@ import org.koin.core.qualifier.TypeQualifier
 import ru.mtuci.core.BaseRepository
 import ru.mtuci.models.BaseDocument
 
+
 val koin = startKoin {
     modules(
         CoreModules.mongo,
