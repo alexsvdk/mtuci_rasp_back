@@ -67,5 +67,8 @@ class LessonsQuery : Query {
 
     }
 
-
+    fun dayLessonById(
+        id: String,
+    ) =
+        regularRepo.get(id)
 }

@@ -15,7 +15,7 @@ class CorsFilter : WebFilter {
         ctx.response.headers.add("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE, OPTIONS")
         ctx.response.headers.add(
             "Access-Control-Allow-Headers",
-            "DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Content-Range,Range"
+            "*"
         )
         return when {
             ctx.request.method == HttpMethod.OPTIONS -> {
