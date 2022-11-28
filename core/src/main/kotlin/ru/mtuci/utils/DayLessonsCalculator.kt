@@ -23,7 +23,7 @@ object DayLessonsCalculator {
         regularLesson: List<RegularLesson>, dateFrom: Long, dateTo: Long, group: Group?
     ): List<DayLesson> {
         val res = mutableListOf<DayLesson>()
-        val cal = GregorianCalendar()
+        val cal = GregorianCalendar(TimeZone.getTimeZone("GMT+3:00"))
         cal.firstDayOfWeek = Calendar.MONDAY
 
         for (dateTime in dateFrom..dateTo step dayMs) {
