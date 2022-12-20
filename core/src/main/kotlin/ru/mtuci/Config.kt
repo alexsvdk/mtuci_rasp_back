@@ -10,6 +10,12 @@ import kotlin.reflect.full.starProjectedType
 object Config {
 
     var MONGO_URL = "mongodb://localhost"
+    var SMTP_HOST = "smtp.mail.ru"
+    var SMTP_PORT = "465"
+    var IMAP_HOST = "imap.mail.ru"
+    var IMAP_PORT = "993"
+    var MAIL_USERNAME = ""
+    var MAIL_PASSWORD = ""
 
     init {
         val env = System.getenv()

@@ -6,8 +6,14 @@ plugins {
 
 dependencies {
     implementation(project(":core"))
-    implementation("org.jsoup:jsoup:1.14.3")
-    implementation("org.apache.poi:poi-ooxml:3.11")
+    implementation("org.jsoup:jsoup:1.15.3")
+    implementation("org.apache.poi:poi-ooxml:5.2.2")
+    implementation("com.sun.mail:javax.mail:1.6.2")
+    implementation("org.tukaani:xz:1.9")
+    implementation("org.apache.commons:commons-compress:1.21")
+}
+repositories {
+    mavenCentral()
 }
 
 application {
@@ -17,7 +23,13 @@ application {
 tasks {
 
     val jar = jar {
-        dependsOn.addAll(listOf("compileJava", "compileKotlin", "processResources")) // We need this for Gradle optimization to work
+        dependsOn.addAll(
+            listOf(
+                "compileJava",
+                "compileKotlin",
+                "processResources"
+            )
+        ) // We need this for Gradle optimization to work
         duplicatesStrategy = DuplicatesStrategy.EXCLUDE
         manifest { attributes(mapOf("Main-Class" to application.mainClass)) } // Provided we set it up in the application plugin configuration
         val sourcesMain = sourceSets.main.get()
@@ -27,7 +39,7 @@ tasks {
         from(contents)
     }
 
-    val buildJob = register("buildJob"){
+    val buildJob = register("buildJob") {
         val properties = Properties()
         properties.load(File(rootProject.projectDir, "local.properties").reader())
 

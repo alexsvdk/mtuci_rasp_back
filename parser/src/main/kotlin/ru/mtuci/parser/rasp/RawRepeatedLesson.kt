@@ -23,7 +23,6 @@ class RawRepeatedLesson(
     var type: String? = null
     var num: Int? = null
     var room: String? = null
-
     var group: Group? = null
 
 
