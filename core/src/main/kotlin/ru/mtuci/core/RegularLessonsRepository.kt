@@ -14,6 +14,8 @@ interface RegularLessonsRepository: BaseRepository<RegularLesson> {
         lessonType: LessonType? = null,
         offset: Int = 0,
         limit: Int = 1000,
+        from: Long? = null,
+        to: Long? = null
     ): RegularLessonsPagination
 
     fun findClone(lesson: RegularLesson): RegularLesson?

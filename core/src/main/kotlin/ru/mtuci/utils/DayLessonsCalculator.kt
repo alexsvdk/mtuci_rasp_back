@@ -32,8 +32,7 @@ object DayLessonsCalculator {
                 if (dateTime < (lesson.dateFrom ?: 0)) continue
                 if (dateTime > (lesson.dateTo ?: Long.MAX_VALUE)) continue
 
-                val group = group ?: lesson.getGroups().firstOrNull() ?: continue
-                cal.time = group.termStartDate?.let { Date(it) } ?: continue
+                cal.time = lesson.dateFrom?.let { Date(it) } ?: continue
 
                 //Хак чтобы неделя начиланась с понедельника
                 while (cal.get(Calendar.DAY_OF_WEEK) != Calendar.MONDAY) cal.add(Calendar.DATE, 1)

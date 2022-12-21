@@ -23,15 +23,16 @@ class RaspParserV1(
     override fun parse(sheet: Sheet, logger: Logger): RaspParseResult {
         val group = getGroupByName(sheet.sheetName)
         val direction = getDirectionByName(sheet.getRow(10).getCell(0).stringCellValue)
+
         group.directionId = direction.id
         val matches =
             RaspParserConstants.dateRex.findAll(sheet.getRow(12).getCell(0).stringCellValue).map { it.value }
                 .toList()
-        matches.firstOrNull()?.let {
-            group.termStartDate = RaspParserConstants.dateFormat.parse(it).time
+        val termStartDate = matches.firstOrNull()?.let {
+            RaspParserConstants.dateFormat.parse(it).time
         }
-        matches.elementAtOrNull(1)?.let {
-            group.termEndDate = RaspParserConstants.dateFormat.parse(it).time
+        val termEndDate = matches.elementAtOrNull(1)?.let {
+            RaspParserConstants.dateFormat.parse(it).time
         }
 
         group.save()
@@ -42,12 +43,12 @@ class RaspParserV1(
             direction.save()
         }
 
-        logger.info("Парсинг расписания для группы ${group.name} направления ${direction.name}")
-        if (group.termStartDate != null && group.termEndDate != null)
+        logger.info("Парсинг расписания для группы ${group.name}")
+        if (termStartDate != null && termEndDate != null)
             logger.info(
-                "Семестр: ${RaspParserConstants.dateFormat.format(Date(group.termStartDate!!))} - ${
+                "Семестр: ${RaspParserConstants.dateFormat.format(Date(termStartDate))} - ${
                     RaspParserConstants.dateFormat.format(
-                        Date(group.termEndDate!!)
+                        Date(termEndDate)
                     )
                 }"
             )
@@ -66,7 +67,7 @@ class RaspParserV1(
         }
 
 
-        return RaspParseResult(lessons, group)
+        return RaspParseResult(lessons, group, termStartDate, termEndDate)
     }
 
     private fun parseRawLessons(row: Row, day: Int): List<RawRepeatedLesson> {

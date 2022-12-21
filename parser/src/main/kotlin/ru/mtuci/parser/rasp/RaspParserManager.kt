@@ -18,7 +18,7 @@ class RaspParserManager(
                 val res = parsers.firstOrNull { it.canParse(sheet) }?.parse(sheet, logger)
 
                 if (res != null) {
-                    logger.info("Найдено ${res.lessons.size} занятий")
+                    logger.info("Найдено занятий: ${res.lessons.size}")
                 } else {
                     logger.info("Не найден парсер для листа ${sheet.sheetName}")
                     continue
@@ -27,8 +27,15 @@ class RaspParserManager(
                 val lessons = res.lessons
                 val group = res.group
 
+                val from = res.termStartDate ?: lessons.mapNotNull { it.dateFrom }.minOrNull()
+                val to = res.termEndDate ?: lessons.mapNotNull { it.dateTo }.maxOrNull()
+
                 if (group.id != null) {
-                    val oldLessons = lessonsRepo.findRegularLessons(group.id).data
+                    val oldLessons = lessonsRepo.findRegularLessons(
+                        groupId = group.id,
+                        from = from,
+                        to = to,
+                    ).data
                     oldLessons.forEach {
                         it.groupIds.remove(group.id)
                         if (it.groupIds.isEmpty()) {
@@ -49,7 +56,7 @@ class RaspParserManager(
                     trueLesson.save()
                 }
 
-            }catch (e: Exception){
+            } catch (e: Exception) {
                 logger.info("Ошибка при парсинге листа ${sheet.sheetName}")
                 logger.throwing("RaspParserManager", "parseRasp", e)
                 e.printStackTrace()

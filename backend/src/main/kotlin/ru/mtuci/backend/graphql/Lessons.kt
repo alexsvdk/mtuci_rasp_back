@@ -25,6 +25,8 @@ class LessonsQuery : Query {
         lessonType: LessonType? = null,
         offset: Int? = 0,
         limit: Int? = 50,
+        from: Long? = null,
+        to: Long? = null
     ): RegularLessonsPagination {
         assert((offset ?: -1) >= 0)
         assert((limit ?: -1) > 0)
@@ -34,7 +36,7 @@ class LessonsQuery : Query {
             disciplineId,
             roomId,
             lessonType,
-            offset!!, limit!!
+            offset!!, limit!!, from, to,
         )
     }
 
@@ -58,7 +60,8 @@ class LessonsQuery : Query {
             disciplineId,
             roomId,
             null,
-            0, 65
+            0, 65,
+            startDate, endDate,
         )
 
         val group = groupId?.let(groupRepo::get)

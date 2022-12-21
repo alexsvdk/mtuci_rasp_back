@@ -2,10 +2,7 @@ package ru.mtuci.db
 
 import com.mongodb.client.MongoDatabase
 import org.bson.conversions.Bson
-import org.litote.kmongo.and
-import org.litote.kmongo.contains
-import org.litote.kmongo.eq
-import org.litote.kmongo.findOne
+import org.litote.kmongo.*
 import ru.mtuci.core.RegularLessonsRepository
 import ru.mtuci.models.LessonType
 import ru.mtuci.models.RegularLesson
@@ -22,7 +19,9 @@ class MongoRegularLessonsRepository(database: MongoDatabase) :
         roomId: String?,
         lessonType: LessonType?,
         offset: Int,
-        limit: Int
+        limit: Int,
+        from: Long?,
+        to: Long?
     ): RegularLessonsPagination {
         val filters = mutableListOf<Bson>()
         groupId?.let { filters.add(RegularLesson::groupIds contains it) }
@@ -30,6 +29,8 @@ class MongoRegularLessonsRepository(database: MongoDatabase) :
         disciplineId?.let { filters.add(RegularLesson::disciplineId eq it) }
         roomId?.let { filters.add(RegularLesson::roomId eq it) }
         lessonType?.let { filters.add(RegularLesson::lessonType eq it) }
+        from?.let { filters.add(RegularLesson::dateFrom gte it) }
+        to?.let { filters.add(RegularLesson::dateTo lte it) }
 
         val findRes = if (filters.isNotEmpty()) collection.find(and(filters)) else collection.find()
         val total = findRes.count()

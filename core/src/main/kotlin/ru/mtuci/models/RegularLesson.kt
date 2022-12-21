@@ -9,10 +9,15 @@ import ru.mtuci.di.koin
 
 class RegularLesson : BaseDocument() {
 
+    @GraphQLDescription("Тип занятия")
     var lessonType = LessonType.UNKNOWN
+    @GraphQLDescription("Дата начала занятий")
     var dateFrom: Long? = null
+    @GraphQLDescription("Дата окончания занятий")
     var dateTo: Long? = null
+    @GraphQLDescription("ID преподавателя")
     var teacherId: String? = null
+    @GraphQLDescription("Теги занятия")
     var tags = mutableListOf<String>()
 
     @GraphQLDescription("Day in two weeks [0-13]")

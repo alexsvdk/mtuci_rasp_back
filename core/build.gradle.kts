@@ -14,7 +14,6 @@ dependencies {
     api("io.insert-koin:koin-core:$koinVersion")
     api("org.slf4j:slf4j-simple:$slf4jVersion")
     api("org.slf4j:slf4j-api:$slf4jVersion")
-    api("org.slf4j:slf4j-impl:$slf4jVersion")
     api("org.apache.logging.log4j:log4j-core:2.19.0")
 
     testApi("io.insert-koin:koin-test:$koinVersion")

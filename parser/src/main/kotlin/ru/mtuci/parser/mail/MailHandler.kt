@@ -1,5 +1,7 @@
 package ru.mtuci.parser.mail
 
+import org.apache.poi.UnsupportedFileFormatException
+import org.apache.poi.ss.usermodel.Workbook
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import ru.mtuci.Config
 import ru.mtuci.parser.log.MailLoggerHandler
@@ -11,11 +13,13 @@ import javax.mail.internet.InternetAddress
 import javax.mail.internet.MimeMessage
 import javax.mail.internet.MimeUtility
 
+
 class MailHandler(
     private val raspParserManager: RaspParserManager,
 ) {
 
     private val archiveManager = ArchiveManager()
+    private val logger = Logger.getLogger("MailLogger")
 
     private lateinit var store: Store
     private lateinit var inbox: Folder
@@ -46,30 +50,36 @@ class MailHandler(
     }
 
     fun scanMail() {
-        if (!store.isConnected || !inbox.isOpen) {
-            init()
-        }
+        try {
+            if (!store.isConnected || !inbox.isOpen) {
+                init()
+            }
 
-        val messages = inbox.messages
-        for (message in messages) {
-            if (!message.isMimeType("multipart/*"))
-                continue
+            val messages = inbox.messages
+            for (message in messages) {
+                if (!message.isMimeType("multipart/*"))
+                    continue
 
-            if (!message.from.any {
-                    it.toString().contains("a.s.shvedchikov@mtuci.ru") || it.toString().contains("alex.svdk@gmail.com")
-                })
+                if (!message.from.any {
+                        it.toString().contains("@mtuci.ru") || it.toString()
+                            .contains("alex.svdk@gmail.com")
+                    })
 
-                continue
-            if (message.flags.contains(Flags.Flag.SEEN))
-                continue
+                    continue
+                if (message.flags.contains(Flags.Flag.SEEN))
+                    continue
 
-            processMessage(message)
+                processMessage(message)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            logger.throwing("MailHandler", "scanMail", e)
         }
     }
 
     private fun processMessage(message: Message) {
         val tag = message.hashCode().toString()
-        val logger = Logger.getLogger("MailLogger")
+        val logger = Logger.getLogger("MailMessageLogger")
         val handler = MailLoggerHandler()
         var raspFound = false
 
@@ -77,8 +87,7 @@ class MailHandler(
             val multipart = message.content as Multipart
 
             logger.addHandler(handler)
-            logger.info("Сообщение: ${MimeUtility.decodeText(message.subject)}")
-
+            logger.info("Лог парсинга расписания")
 
             for (i in 0 until multipart.count) {
                 val bodyPart = multipart.getBodyPart(i)
@@ -90,6 +99,7 @@ class MailHandler(
                     logger.info("Файл: ${MimeUtility.decodeText(bodyPart.fileName)}")
                     val xss = XSSFWorkbook(bodyPart.inputStream)
                     raspParserManager.parseRasp(xss, logger)
+                    xss.close()
                 }
 
                 // 7z
@@ -100,19 +110,30 @@ class MailHandler(
                         raspFound = true
                         logger.severe("---")
                         logger.info("Файл: ${file.name}")
-                        val xss = XSSFWorkbook(bodyPart.inputStream)
+                        val xss: Workbook
+                        try {
+                            xss = XSSFWorkbook(file.inputStream())
+                        } catch (e: UnsupportedFileFormatException) {
+                            logger.warning("Не удалось распознать файл как xlsx, возможно файл защищен паролем")
+                            continue
+                        } catch (e: Exception) {
+                            logger.warning("Не удалось открыть файл")
+                            logger.throwing("MailHandler", "processMessage", e)
+                            e.printStackTrace()
+                            continue
+                        }
                         raspParserManager.parseRasp(xss, logger)
+                        xss.close()
                     }
                 }
             }
 
         } catch (e: Exception) {
+            setIsReadMessage(message, false)
             logger.throwing("MailHandler", "processMessage", e)
             e.printStackTrace()
-            inbox.setFlags(arrayOf(message), Flags(Flags.Flag.SEEN), false)
         } finally {
             if (raspFound) {
-                inbox.setFlags(arrayOf(message), Flags(Flags.Flag.SEEN), true)
                 sendLog(message, handler.getLog())
             }
             logger.removeHandler(handler)
@@ -122,31 +143,33 @@ class MailHandler(
     }
 
     private fun sendLog(message: Message, log: String) {
-        val reply = message.reply(false) as MimeMessage
-        reply.setFrom(
-            InternetAddress.toString(
-                message
-                    .getRecipients(Message.RecipientType.TO)
-            )
-        )
-        reply.setText(log)
-        reply.replyTo = message.replyTo
-        reply.addRecipients(Message.RecipientType.TO, message.from)
-
-        val transport = session.getTransport("smtp")
+        var transport: Transport? = null
         try {
+            init()
+            val reply = message.reply(false) as MimeMessage
+            reply.setFrom(
+                InternetAddress.toString(
+                    message
+                        .getRecipients(Message.RecipientType.TO)
+                )
+            )
+            reply.setText(log)
+            reply.replyTo = message.replyTo
+            reply.addRecipients(Message.RecipientType.TO, message.from)
+
+            transport = session.getTransport("smtp")
             transport.connect(Config.SMTP_HOST, Config.SMTP_PORT.toInt(), Config.MAIL_USERNAME, Config.MAIL_PASSWORD)
             transport.sendMessage(reply, reply.allRecipients)
             saveToSent(reply)
         } catch (e: Exception) {
             e.printStackTrace()
         } finally {
-            transport.close()
+            transport?.close()
         }
     }
 
     private fun saveToSent(message: Message) {
-        val sentFolder = store.getFolder("SENT")
+        val sentFolder = store.getFolder("Sent Mail")
         try {
             sentFolder.open(Folder.READ_WRITE)
             sentFolder.appendMessages(arrayOf(message))
@@ -155,6 +178,18 @@ class MailHandler(
         } finally {
             if (sentFolder.isOpen)
                 sentFolder.close(true)
+        }
+    }
+
+    private fun setIsReadMessage(message: Message, seen: Boolean) {
+        try {
+            if (!inbox.isOpen) {
+                init()
+            }
+            inbox.setFlags(arrayOf(message), Flags(Flags.Flag.SEEN), seen)
+        } catch (e: Exception) {
+            logger.throwing("MailHandler", "processMessage", e)
+            e.printStackTrace()
         }
     }
 }
