@@ -7,9 +7,9 @@ import java.util.*
 
 object DayLessonsCalculator {
 
-    private val minuteMs: Long = 60 * 1000
-    private val hourMs: Long = 60 * minuteMs
-    private val dayMs: Long = 24 * hourMs
+    private const val minuteMs: Long = 60 * 1000
+    private const val hourMs: Long = 60 * minuteMs
+    private const val dayMs: Long = 24 * hourMs
 
     private val pairsDur = listOf(
         Pair(9 * hourMs + 30 * minuteMs, 11 * hourMs + 5 * minuteMs),

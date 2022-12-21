@@ -16,6 +16,7 @@ object Config {
     var IMAP_PORT = "993"
     var MAIL_USERNAME = ""
     var MAIL_PASSWORD = ""
+    var APP_BASE_PATH = "./"
 
     init {
         val env = System.getenv()

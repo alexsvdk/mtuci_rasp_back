@@ -1,0 +1,15 @@
+[Unit]
+Description=MTUCI Rasp parser
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+%ENV%
+Type=simple
+Restart=always
+RestartSec=1
+User=%USER%
+ExecStart=/usr/bin/java -jar %JAR%
+
+[Install]
+WantedBy=multi-user.target

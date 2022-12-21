@@ -49,6 +49,19 @@ class MailHandler(
         inbox.open(Folder.READ_WRITE)
     }
 
+    private fun reinit() {
+        try {
+            if (!store.isConnected) {
+                store.isConnected
+            }
+            if (!inbox.isOpen) {
+                inbox.open(Folder.READ_WRITE)
+            }
+        } catch (e: Exception) {
+            init()
+        }
+    }
+
     fun scanMail() {
         try {
             if (!store.isConnected || !inbox.isOpen) {
@@ -145,7 +158,7 @@ class MailHandler(
     private fun sendLog(message: Message, log: String) {
         var transport: Transport? = null
         try {
-            init()
+            reinit()
             val reply = message.reply(false) as MimeMessage
             reply.setFrom(
                 InternetAddress.toString(
@@ -169,23 +182,20 @@ class MailHandler(
     }
 
     private fun saveToSent(message: Message) {
-        val sentFolder = store.getFolder("Sent Mail")
         try {
+            reinit()
+            val sentFolder = store.defaultFolder.list().first { it.name.contains("sent", true) }
             sentFolder.open(Folder.READ_WRITE)
             sentFolder.appendMessages(arrayOf(message))
+            sentFolder.close()
         } catch (e: Exception) {
             e.printStackTrace()
-        } finally {
-            if (sentFolder.isOpen)
-                sentFolder.close(true)
         }
     }
 
     private fun setIsReadMessage(message: Message, seen: Boolean) {
         try {
-            if (!inbox.isOpen) {
-                init()
-            }
+            reinit()
             inbox.setFlags(arrayOf(message), Flags(Flags.Flag.SEEN), seen)
         } catch (e: Exception) {
             logger.throwing("MailHandler", "processMessage", e)

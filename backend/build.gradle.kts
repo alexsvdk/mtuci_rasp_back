@@ -26,6 +26,10 @@ task("buildService") {
     val serverPath = properties.getProperty("server_path")
     val serverUser = properties.getProperty("server_user")
 
+    if (!buildDir.exists()) {
+        buildDir.mkdirs()
+    }
+
     val fileTo = File(buildDir, "mtuci-rasp-backend.service")
     val fileFrom = File(projectDir, "deploy/.service")
 

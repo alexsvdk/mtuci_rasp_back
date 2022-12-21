@@ -65,6 +65,10 @@ class RaspParserV1(
             it.group = group
             it.buildLesson()
         }
+        lessons.forEach {
+            it.dateFrom = it.dateFrom ?: termStartDate
+            it.dateTo = it.dateTo ?: termEndDate
+        }
 
 
         return RaspParseResult(lessons, group, termStartDate, termEndDate)

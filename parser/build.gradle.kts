@@ -39,19 +39,36 @@ tasks {
         from(contents)
     }
 
-    val buildJob = register("buildJob") {
+    task("buildService") {
         val properties = Properties()
         properties.load(File(rootProject.projectDir, "local.properties").reader())
 
+        if (!buildDir.exists()) {
+            buildDir.mkdirs()
+        }
+
         val mongoUrl = properties.getProperty("mongo_url")
         val serverPath = properties.getProperty("server_path")
+        val serverUser = properties.getProperty("server_user")
+        val mailUsername = properties.getProperty("mail_username")
+        val mailPassword = properties.getProperty("mail_password")
 
-        val fileTo = File(buildDir, "mtuci-rasp-parser.sh")
-        val fileFrom = File(projectDir, "deploy/job.sh")
+        val fileTo = File(buildDir, "mtuci-rasp-parser.service")
+        val fileFrom = File(projectDir, "deploy/.service")
 
         val res = fileFrom.readText()
-            .replace("%MONGO_URL%", mongoUrl)
+            .replace(
+                "%ENV%",
+                """
+                    Environment="MONGO_URL=$mongoUrl"
+                    Environment="MAIL_USERNAME=$mailUsername"
+                    Environment="MAIL_PASSWORD=$mailPassword"
+                    Environment="APP_BASE_PATH=$serverPath"
+                """.trimIndent()
+
+            )
             .replace("%JAR%", "$serverPath/jar/parser.jar")
+            .replace("%USER%", serverUser)
 
         if (fileTo.exists()) {
             fileTo.delete()

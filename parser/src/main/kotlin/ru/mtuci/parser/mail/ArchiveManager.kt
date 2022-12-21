@@ -1,25 +1,34 @@
 package ru.mtuci.parser.mail
 
 import org.apache.commons.compress.archivers.sevenz.SevenZFile
+import ru.mtuci.Config
 import java.io.File
 import java.io.InputStream
+import java.util.logging.Logger
 
 
 class ArchiveManager {
 
-    private val archiveFolder = File("archive")
+    private val archiveFolder = File(Config.APP_BASE_PATH,"archive")
+    private val logger = Logger.getLogger(ArchiveManager::class.java.name)
 
     init {
         if (!archiveFolder.exists()) {
-            archiveFolder.mkdir()
+            archiveFolder.mkdirs()
         }
     }
 
     fun unarchive7Z(inputStream: InputStream, tag: String): List<File> {
         val archiveFile = File(archiveFolder, "$tag.7z")
-        if (archiveFile.exists()) {
-            archiveFile.delete()
-        }
+
+        logger.info("Base path: ${Config.APP_BASE_PATH}")
+        logger.info("Unarchive 7z file: ${archiveFile.absolutePath}")
+
+        if (!archiveFile.parentFile.exists())
+            archiveFile.parentFile.mkdirs()
+        if (!archiveFile.exists())
+            archiveFile.createNewFile()
+
         archiveFile.createNewFile()
         archiveFile.outputStream().use { fileOut ->
             inputStream.copyTo(fileOut)
