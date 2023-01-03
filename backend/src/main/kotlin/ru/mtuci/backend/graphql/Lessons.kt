@@ -55,20 +55,44 @@ class LessonsQuery : Query {
         assert(startDate < endDate)
 
         val lessons = regularRepo.findRegularLessons(
-            groupId,
-            teacherId,
-            disciplineId,
-            roomId,
-            null,
-            0, 65,
-            startDate, endDate,
+            groupId = groupId,
+            teacherId = teacherId,
+            disciplineId = disciplineId,
+            roomId = roomId,
+            offset = 0, limit = 65,
+            from = startDate,
+            to = endDate,
         )
 
-        val group = groupId?.let(groupRepo::get)
-
-        return DayLessonsCalculator.calculateDayLessons(lessons.data, startDate, endDate, group)
-
+        return DayLessonsCalculator.calculateDayLessons(lessons.data, startDate, endDate)
     }
+
+    fun findDayLessonsForNextDays(
+        days: Int? = null,
+        startDate: Long?,
+        groupId: String? = null,
+        teacherId: String? = null,
+        disciplineId: String? = null,
+        roomId: String? = null,
+    ): List<DayLesson> {
+        val days = days ?: 1
+        val startDate = startDate ?: Date().time
+
+        assert(days > 0)
+        assert(startDate > 0)
+
+        val lessons = regularRepo.findRegularLessons(
+            groupId = groupId,
+            teacherId = teacherId,
+            disciplineId = disciplineId,
+            roomId = roomId,
+            offset = 0, limit = 65,
+            from = startDate,
+        )
+
+        return DayLessonsCalculator.calculateDayLessonsForNextDays(lessons.data, startDate, days)
+    }
+
 
     fun dayLessonById(
         id: String,

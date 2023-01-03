@@ -10,5 +10,5 @@ fun main() {
     val group = groupsRepository.findByName("БАП2101")
     val lessons = lessonsRepo.findRegularLessons(group!!.id).data
 
-    DayLessonsCalculator.calculateDayLessons(lessons, 1676454759257, 1676454759257, group)
+    DayLessonsCalculator.calculateDayLessons(lessons, 1676454759257, 1676454759257)
 }

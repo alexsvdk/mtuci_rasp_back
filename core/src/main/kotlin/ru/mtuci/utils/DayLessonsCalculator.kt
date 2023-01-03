@@ -1,7 +1,6 @@
 package ru.mtuci.utils
 
 import ru.mtuci.models.DayLesson
-import ru.mtuci.models.Group
 import ru.mtuci.models.RegularLesson
 import java.util.*
 
@@ -9,7 +8,7 @@ object DayLessonsCalculator {
 
     private const val minuteMs: Long = 60 * 1000
     private const val hourMs: Long = 60 * minuteMs
-    private const val dayMs: Long = 24 * hourMs
+     const val dayMs: Long = 24 * hourMs
 
     private val pairsDur = listOf(
         Pair(9 * hourMs + 30 * minuteMs, 11 * hourMs + 5 * minuteMs),
@@ -20,24 +19,31 @@ object DayLessonsCalculator {
     )
 
     fun calculateDayLessons(
-        regularLesson: List<RegularLesson>, dateFrom: Long, dateTo: Long, group: Group?
+        regularLesson: List<RegularLesson>,
+        dateFrom: Long,
+        dateTo: Long?,
     ): List<DayLesson> {
+        val dateTo = dateTo ?: Long.MAX_VALUE
         val res = mutableListOf<DayLesson>()
         val cal = GregorianCalendar(TimeZone.getTimeZone("GMT+3:00"))
         cal.firstDayOfWeek = Calendar.MONDAY
 
-        for (dateTime in dateFrom..dateTo step dayMs) {
-            for (lesson in regularLesson) {
-                val id = lesson.id ?: continue
-                if (dateTime < (lesson.dateFrom ?: 0)) continue
-                if (dateTime > (lesson.dateTo ?: Long.MAX_VALUE)) continue
+        for (lesson in regularLesson) {
+            val id = lesson.id ?: continue
+            if ((lesson.dateFrom ?: continue) > dateTo) continue
+            if ((lesson.dateTo ?: continue) < dateFrom) continue
 
-                cal.time = lesson.dateFrom?.let { Date(it) } ?: continue
+            cal.timeInMillis = lesson.dateFrom!!
+            //Хак чтобы неделя начиланась с понедельника
+            while (cal.get(Calendar.DAY_OF_WEEK) != Calendar.MONDAY) cal.add(Calendar.DATE, 1)
 
-                //Хак чтобы неделя начиланась с понедельника
-                while (cal.get(Calendar.DAY_OF_WEEK) != Calendar.MONDAY) cal.add(Calendar.DATE, 1)
+            val dateFrom = maxOf(lesson.dateFrom!!, dateFrom)
+            val dateTo = minOf(lesson.dateTo!!, dateTo)
+
+            for (dateTime in dateFrom..dateTo step dayMs) {
+
                 var tweekDay = (((dateTime - cal.time.time) / dayMs) % 14).toInt()
-                if (tweekDay < 0) cal.add(Calendar.WEEK_OF_YEAR, -1)
+                if (tweekDay < -2) cal.add(Calendar.WEEK_OF_YEAR, -1)
                 tweekDay = (((dateTime - cal.time.time) / dayMs) % 14).toInt()
 
                 if (tweekDay == lesson.tweekDay) {
@@ -50,11 +56,37 @@ object DayLessonsCalculator {
                         )
                     )
                 }
+
             }
         }
 
         res.sortBy { it.startTime }
         return res
+    }
+
+    fun calculateDayLessonsForNextDays(
+        regularLesson: List<RegularLesson>,
+        dateFrom: Long,
+        n: Int,
+    ): List<DayLesson> {
+        var regularLesson = regularLesson
+        var date = dateFrom + dayMs
+        val result = mutableListOf<DayLesson>()
+        var count = 0
+        var hasPotentialLessons: Boolean
+        do {
+            val res = calculateDayLessons(regularLesson, date, date + 1)
+            if (res.isNotEmpty()) {
+                result.addAll(res)
+                count++
+                if (count == n) break
+            }
+            date += dayMs
+            regularLesson = regularLesson.filter {(it.dateTo ?: 0) >= date }
+            hasPotentialLessons = regularLesson.isNotEmpty()
+        } while (hasPotentialLessons)
+
+        return result
     }
 
 }

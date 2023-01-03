@@ -7,6 +7,7 @@ import ru.mtuci.core.RegularLessonsRepository
 import ru.mtuci.models.LessonType
 import ru.mtuci.models.RegularLesson
 import ru.mtuci.models.RegularLessonsPagination
+import ru.mtuci.utils.DayLessonsCalculator
 
 class MongoRegularLessonsRepository(database: MongoDatabase) :
     MongoBaseRepository<RegularLesson>(database, RegularLesson::class.java),
@@ -29,8 +30,8 @@ class MongoRegularLessonsRepository(database: MongoDatabase) :
         disciplineId?.let { filters.add(RegularLesson::disciplineId eq it) }
         roomId?.let { filters.add(RegularLesson::roomId eq it) }
         lessonType?.let { filters.add(RegularLesson::lessonType eq it) }
-        from?.let { filters.add(RegularLesson::dateFrom lte it) }
-        to?.let { filters.add(RegularLesson::dateTo gte it) }
+        from?.let { filters.add(RegularLesson::dateTo gte (it - DayLessonsCalculator.dayMs)) }
+        to?.let { filters.add(RegularLesson::dateFrom lte (it + DayLessonsCalculator.dayMs)) }
 
         val findRes = if (filters.isNotEmpty()) collection.find(and(filters)) else collection.find()
         val total = findRes.count()
