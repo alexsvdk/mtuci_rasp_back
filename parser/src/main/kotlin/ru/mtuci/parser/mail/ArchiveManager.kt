@@ -21,7 +21,6 @@ class ArchiveManager {
     fun unarchive7Z(inputStream: InputStream, tag: String): List<File> {
         val archiveFile = File(archiveFolder, "$tag.7z")
 
-        logger.info("Base path: ${Config.APP_BASE_PATH}")
         logger.info("Unarchive 7z file: ${archiveFile.absolutePath}")
 
         if (!archiveFile.parentFile.exists())

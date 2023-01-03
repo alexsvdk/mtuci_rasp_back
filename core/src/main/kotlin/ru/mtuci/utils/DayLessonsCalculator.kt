@@ -36,8 +36,10 @@ object DayLessonsCalculator {
 
                 //Хак чтобы неделя начиланась с понедельника
                 while (cal.get(Calendar.DAY_OF_WEEK) != Calendar.MONDAY) cal.add(Calendar.DATE, 1)
+                var tweekDay = (((dateTime - cal.time.time) / dayMs) % 14).toInt()
+                if (tweekDay < 0) cal.add(Calendar.WEEK_OF_YEAR, -1)
+                tweekDay = (((dateTime - cal.time.time) / dayMs) % 14).toInt()
 
-                val tweekDay = (((dateTime - cal.time.time) / dayMs) % 14).toInt()
                 if (tweekDay == lesson.tweekDay) {
                     val dur = lesson.lessonNum?.let { pairsDur[it - 1] } ?: continue
                     res.add(

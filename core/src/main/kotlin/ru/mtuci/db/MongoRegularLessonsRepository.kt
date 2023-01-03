@@ -29,8 +29,8 @@ class MongoRegularLessonsRepository(database: MongoDatabase) :
         disciplineId?.let { filters.add(RegularLesson::disciplineId eq it) }
         roomId?.let { filters.add(RegularLesson::roomId eq it) }
         lessonType?.let { filters.add(RegularLesson::lessonType eq it) }
-        from?.let { filters.add(RegularLesson::dateFrom gte it) }
-        to?.let { filters.add(RegularLesson::dateTo lte it) }
+        from?.let { filters.add(RegularLesson::dateFrom lte it) }
+        to?.let { filters.add(RegularLesson::dateTo gte it) }
 
         val findRes = if (filters.isNotEmpty()) collection.find(and(filters)) else collection.find()
         val total = findRes.count()

@@ -184,10 +184,13 @@ class MailHandler(
     private fun saveToSent(message: Message) {
         try {
             reinit()
-            val sentFolder = store.defaultFolder.list().first { it.name.contains("sent", true) }
-            sentFolder.open(Folder.READ_WRITE)
-            sentFolder.appendMessages(arrayOf(message))
-            sentFolder.close()
+            val sentFolder = listOf(
+                store.defaultFolder.list().toList(),
+                inbox.list().toList(),
+            ).flatten().firstOrNull { it.name.contains("sen", true) || it.name.contains("Отправленные", true) }
+            sentFolder?.open(Folder.READ_WRITE)
+            sentFolder?.appendMessages(arrayOf(message))
+            sentFolder?.close()
         } catch (e: Exception) {
             e.printStackTrace()
         }
