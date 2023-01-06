@@ -12,6 +12,7 @@
             <option value="$PROJECT_DIR$/backend" />
             <option value="$PROJECT_DIR$/buildSrc" />
             <option value="$PROJECT_DIR$/core" />
+            <option value="$PROJECT_DIR$/ics_backend" />
             <option value="$PROJECT_DIR$/parser" />
           </set>
         </option>

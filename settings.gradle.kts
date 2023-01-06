@@ -12,5 +12,5 @@ include(
     "backend",
     "core",
     "parser",
-   // "ics_backend",
+    "ics_backend",
 )

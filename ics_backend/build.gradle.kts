@@ -4,14 +4,19 @@ val ktorVersion = rootProject.properties["ktor_version"].toString()
 
 plugins {
     id("ru.mtuci.kotlin-application-conventions")
-    id("io.ktor.plugin") version "2.1.2"
+    kotlin("jvm")
+    id("io.ktor.plugin") version "2.2.2"
+}
+
+repositories {
+    mavenCentral()
+    maven { url = uri("https://maven.pkg.jetbrains.space/public/p/ktor/eap") }
 }
 
 dependencies {
     implementation(project(":core"))
     implementation("io.ktor:ktor-server-core:$ktorVersion")
     implementation("io.ktor:ktor-server-netty:$ktorVersion")
-    implementation("io.ktor:ktor-server-routing:$ktorVersion")
 }
 
 application {
