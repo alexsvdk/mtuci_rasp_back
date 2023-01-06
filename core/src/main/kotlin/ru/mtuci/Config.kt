@@ -55,6 +55,7 @@ object Config {
     var APP_BASE_PATH = "./"
     var APP_BASE_URL = "http://localhost:8080"
     var APP_BASE_URL_ICS = "$APP_BASE_URL/ics"
+    var CALCULATOR_VERSION = 1
 
     init {
         val env = System.getenv()

@@ -6,6 +6,8 @@ import io.ktor.server.netty.*
 import io.ktor.server.plugins.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import ru.mtuci.Config
+import ru.mtuci.core.CalendarDataRepository
 import ru.mtuci.di.koin
 import ru.mtuci.ics_backend.calculator.IcsCalculator
 import ru.mtuci.ics_backend.di.icsModule
@@ -19,17 +21,20 @@ fun main() {
 fun Application.icsServerModule() {
     val icsStorage = koin.get<IcsStorage>()
     val calculator = koin.get<IcsCalculator>()
+    val calendarDataRepository = koin.get<CalendarDataRepository>()
 
     routing {
         get("/{id}") {
             val id = call.parameters["id"]?.substringBefore(".ics") ?: throw NotFoundException()
-            val icsUrl = //icsStorage.getUrlById(id) ?: run {
-                run {
-                    val icsFile = calculator.createIcsFile(id)
-                    val url = icsStorage.uploadIcs(id, icsFile)
-                    icsFile.delete()
-                    url
-                }
+            val calendarData = calendarDataRepository.get(id) ?: throw NotFoundException()
+            val isValid =
+                calendarData.filtersRevisionsHash == calendarData.savedFiltersRevisionsHash && calendarData.calculatorVersion == Config.CALCULATOR_VERSION
+            val icsUrl = (if (isValid) icsStorage.getUrlById(id) else null) ?: run {
+                val icsFile = calculator.createIcsFile(id)
+                val url = icsStorage.uploadIcs(id, icsFile)
+                icsFile.delete()
+                url
+            }
             call.respondRedirect(icsUrl)
         }
     }

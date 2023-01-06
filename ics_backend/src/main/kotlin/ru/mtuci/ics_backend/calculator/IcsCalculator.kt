@@ -112,6 +112,7 @@ class IcsCalculator(
         }
 
         calendarData.savedFiltersRevisionsHash = filterHashCalculator.getFilterHash(calendarData.searchFilter)
+        calendarData.calculatorVersion = Config.CALCULATOR_VERSION
         calendarData.save()
 
         val file = File(icsDir, "$id.ics")

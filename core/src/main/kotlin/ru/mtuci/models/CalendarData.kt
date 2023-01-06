@@ -17,6 +17,8 @@ data class CalendarData(
     @GraphQLIgnore
     var savedFiltersRevisionsHash = 0
 
+    var calculatorVersion = Config.CALCULATOR_VERSION
+
     @BsonIgnore
     @GraphQLName("iCalUrl")
     @GraphQLDescription("Ссылка на *.ics файл")
