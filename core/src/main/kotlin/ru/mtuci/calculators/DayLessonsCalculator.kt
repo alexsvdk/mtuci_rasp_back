@@ -9,6 +9,7 @@ object DayLessonsCalculator {
     private const val minuteMs: Long = 60 * 1000
     private const val hourMs: Long = 60 * minuteMs
     const val dayMs: Long = 24 * hourMs
+     val timeZone = TimeZone.getTimeZone("GMT+3:00")
 
     private val pairsDur = listOf(
         Pair(9 * hourMs + 30 * minuteMs, 11 * hourMs + 5 * minuteMs),
@@ -25,7 +26,7 @@ object DayLessonsCalculator {
     ): List<DayLesson> {
         val dateTo = dateTo ?: Long.MAX_VALUE
         val res = mutableListOf<DayLesson>()
-        val cal = GregorianCalendar(TimeZone.getTimeZone("GMT+3:00"))
+        val cal = GregorianCalendar(timeZone)
         cal.firstDayOfWeek = Calendar.MONDAY
 
         for (lesson in regularLesson) {
@@ -97,6 +98,23 @@ object DayLessonsCalculator {
         } while (hasPotentialLessons)
 
         return result
+    }
+
+    fun calculateFirstLesson(
+        lesson: RegularLesson
+    ): DayLesson? {
+        val dateFrom = lesson.dateFrom ?: return null
+        val rawRes = calculateDayLessonsForNextDays(listOf(lesson), dateFrom, 1)
+        return rawRes.firstOrNull()
+    }
+
+    fun calculateLastLesson(
+        lesson: RegularLesson
+    ): DayLesson? {
+        val dateTo = lesson.dateTo ?: return null
+        val lastTweekDate = dateTo - dayMs * 14
+        val rawRes = calculateDayLessons(listOf(lesson), lastTweekDate, dateTo)
+        return rawRes.lastOrNull()
     }
 
 }

@@ -48,6 +48,8 @@ object Config {
             return field
         }
     var S3_ENDPOINT = "https://storage.yandexcloud.net"
+    var S3_BUCKET = "mtuci"
+    var S3_REGION = "ru-central1"
 
     // app
     var APP_BASE_PATH = "./"

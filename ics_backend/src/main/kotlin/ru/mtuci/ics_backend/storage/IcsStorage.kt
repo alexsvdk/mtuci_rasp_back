@@ -1,14 +1,11 @@
 package ru.mtuci.ics_backend.storage
 
-import ru.mtuci.ics_backend.models.IcsRequest
-import java.io.InputStream
+import java.io.File
 
 interface IcsStorage {
 
-    fun writeFile(request: IcsRequest, stream: InputStream)
+    suspend fun getUrlById(id: String): String?
 
-    fun deleteFile(request: IcsRequest)
-
-    fun getFileUrl(request: IcsRequest): String?
+    suspend fun uploadIcs(id: String, ics: File): String
 
 }
