@@ -4,7 +4,7 @@ import com.mongodb.client.MongoDatabase
 import org.litote.kmongo.deleteOneById
 import org.litote.kmongo.findOneById
 import ru.mtuci.core.BaseRepository
-import ru.mtuci.models.BaseDocument
+import ru.mtuci.models.common.BaseDocument
 
 open class MongoBaseRepository<T : BaseDocument>(
     private val database: MongoDatabase,

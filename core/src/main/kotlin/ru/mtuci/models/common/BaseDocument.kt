@@ -1,4 +1,4 @@
-package ru.mtuci.models
+package ru.mtuci.models.common
 
 import com.expediagroup.graphql.generator.annotations.GraphQLDescription
 import com.fasterxml.jackson.annotation.JsonProperty

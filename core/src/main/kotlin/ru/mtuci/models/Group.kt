@@ -6,9 +6,12 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import org.bson.codecs.pojo.annotations.BsonIgnore
 import ru.mtuci.di.getRepository
 import ru.mtuci.di.koin
+import ru.mtuci.models.common.BaseDocument
+import ru.mtuci.models.common.RevisionDocument
+import ru.mtuci.models.common.RevisionDocumentImpl
 
 @GraphQLDescription("Модель группы")
-class Group : BaseDocument() {
+class Group : BaseDocument(), RevisionDocument by RevisionDocumentImpl() {
 
     @GraphQLDescription("Название группы")
     var name: String? = null

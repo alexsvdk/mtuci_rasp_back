@@ -1,5 +1,7 @@
 package ru.mtuci.models
 
+import ru.mtuci.models.common.BaseDocument
+
 class Direction : BaseDocument() {
 
     var code: String? = null

@@ -1,4 +1,4 @@
-package ru.mtuci.utils
+package ru.mtuci.calculators
 
 import ru.mtuci.models.DayLesson
 import ru.mtuci.models.RegularLesson
@@ -8,7 +8,7 @@ object DayLessonsCalculator {
 
     private const val minuteMs: Long = 60 * 1000
     private const val hourMs: Long = 60 * minuteMs
-     const val dayMs: Long = 24 * hourMs
+    const val dayMs: Long = 24 * hourMs
 
     private val pairsDur = listOf(
         Pair(9 * hourMs + 30 * minuteMs, 11 * hourMs + 5 * minuteMs),
@@ -36,22 +36,32 @@ object DayLessonsCalculator {
             cal.timeInMillis = lesson.dateFrom!!
             //Хак чтобы неделя начиланась с понедельника
             while (cal.get(Calendar.DAY_OF_WEEK) != Calendar.MONDAY) cal.add(Calendar.DATE, 1)
+            cal.set(Calendar.HOUR_OF_DAY, 0)
+            cal.set(Calendar.MINUTE, 0)
+            cal.set(Calendar.SECOND, 0)
+            cal.set(Calendar.MILLISECOND, 0)
+
+            var timezonedCalTime = cal.timeInMillis + cal.timeZone.rawOffset
 
             val dateFrom = maxOf(lesson.dateFrom!!, dateFrom)
             val dateTo = minOf(lesson.dateTo!!, dateTo)
 
             for (dateTime in dateFrom..dateTo step dayMs) {
-
-                var tweekDay = (((dateTime - cal.time.time) / dayMs) % 14).toInt()
-                if (tweekDay < -2) cal.add(Calendar.WEEK_OF_YEAR, -1)
-                tweekDay = (((dateTime - cal.time.time) / dayMs) % 14).toInt()
+                val dateWithoutTime = dateTime - dateTime % dayMs
+                var tweekDay = (((dateWithoutTime - timezonedCalTime) / dayMs) % 14).toInt()
+                if (tweekDay < -2) {
+                    cal.add(Calendar.WEEK_OF_YEAR, -1)
+                    timezonedCalTime = cal.timeInMillis + cal.timeZone.rawOffset
+                    tweekDay = (((dateTime - timezonedCalTime) / dayMs) % 14).toInt()
+                }
 
                 if (tweekDay == lesson.tweekDay) {
+
                     val dur = lesson.lessonNum?.let { pairsDur[it - 1] } ?: continue
                     res.add(
                         DayLesson(
-                            cal.time.time + dur.first,
-                            cal.time.time + dur.second,
+                            dateWithoutTime + dur.first,
+                            dateWithoutTime + dur.second,
                             id,
                         )
                     )
@@ -82,7 +92,7 @@ object DayLessonsCalculator {
                 if (count == n) break
             }
             date += dayMs
-            regularLesson = regularLesson.filter {(it.dateTo ?: 0) >= date }
+            regularLesson = regularLesson.filter { (it.dateTo ?: 0) >= date }
             hasPotentialLessons = regularLesson.isNotEmpty()
         } while (hasPotentialLessons)
 

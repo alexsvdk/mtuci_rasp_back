@@ -1,6 +1,6 @@
 package ru.mtuci.core
 
-import ru.mtuci.models.BaseDocument
+import ru.mtuci.models.common.BaseDocument
 
 interface BaseRepository<T : BaseDocument> {
 

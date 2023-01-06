@@ -2,99 +2,80 @@ package ru.mtuci.backend.graphql
 
 import com.expediagroup.graphql.server.operations.Query
 import org.springframework.stereotype.Component
-import ru.mtuci.core.GroupsRepository
 import ru.mtuci.core.RegularLessonsRepository
 import ru.mtuci.di.koin
 import ru.mtuci.models.DayLesson
-import ru.mtuci.models.LessonType
 import ru.mtuci.models.RegularLessonsPagination
-import ru.mtuci.utils.DayLessonsCalculator
+import ru.mtuci.models.SearchFilter
+import ru.mtuci.calculators.DayLessonsCalculator
 import java.util.*
 
 @Component
 class LessonsQuery : Query {
 
     private val regularRepo: RegularLessonsRepository = koin.get()
-    private val groupRepo: GroupsRepository = koin.get()
 
     fun findRegularLessons(
-        groupId: String? = null,
-        teacherId: String? = null,
-        disciplineId: String? = null,
-        roomId: String? = null,
-        lessonType: LessonType? = null,
+        searchFilter: SearchFilter,
         offset: Int? = 0,
         limit: Int? = 50,
         from: Long? = null,
-        to: Long? = null
+        to: Long? = null,
     ): RegularLessonsPagination {
-        assert((offset ?: -1) >= 0)
-        assert((limit ?: -1) > 0)
+        if ((offset ?: -1) < 0)
+            throw IllegalArgumentException("Offset must be positive")
+        if ((limit ?: -1) < 0)
+            throw IllegalArgumentException("Limit must be positive")
+        if (searchFilter.isEmpty())
+            throw IllegalArgumentException("Search filter must not be empty")
+
         return regularRepo.findRegularLessons(
-            groupId,
-            teacherId,
-            disciplineId,
-            roomId,
-            lessonType,
-            offset!!, limit!!, from, to,
+            searchFilter, offset!!, limit!!, from, to
         )
     }
 
     fun findDayLessons(
-        startDate: Long? = null,
-        endDate: Long? = null,
-        groupId: String? = null,
-        teacherId: String? = null,
-        disciplineId: String? = null,
-        roomId: String? = null,
+        searchFilter: SearchFilter,
+        startDate: Long?,
+        endDate: Long?,
     ): List<DayLesson> {
         val startDate = startDate ?: Date().time
         val endDate = endDate ?: (startDate + 1)
 
-        assert(groupId != null || teacherId != null || disciplineId != null || roomId != null)
-        assert(startDate < endDate)
+        if (startDate > endDate)
+            throw IllegalArgumentException("Start date must be less than end date")
+        if (searchFilter.isEmpty())
+            throw IllegalArgumentException("Search filter must not be empty")
 
         val lessons = regularRepo.findRegularLessons(
-            groupId = groupId,
-            teacherId = teacherId,
-            disciplineId = disciplineId,
-            roomId = roomId,
-            offset = 0, limit = 65,
-            from = startDate,
-            to = endDate,
+            searchFilter, from = startDate, to = endDate,
         )
 
         return DayLessonsCalculator.calculateDayLessons(lessons.data, startDate, endDate)
     }
 
     fun findDayLessonsForNextDays(
+        searchFilter: SearchFilter,
         days: Int? = null,
         startDate: Long?,
-        groupId: String? = null,
-        teacherId: String? = null,
-        disciplineId: String? = null,
-        roomId: String? = null,
     ): List<DayLesson> {
         val days = days ?: 1
         val startDate = startDate ?: Date().time
 
-        assert(days > 0)
-        assert(startDate > 0)
+        if (startDate > 0)
+            throw IllegalArgumentException("Start date must be positive")
+        if (searchFilter.isEmpty())
+            throw IllegalArgumentException("Search filter must not be empty")
 
         val lessons = regularRepo.findRegularLessons(
-            groupId = groupId,
-            teacherId = teacherId,
-            disciplineId = disciplineId,
-            roomId = roomId,
-            offset = 0, limit = 65,
-            from = startDate,
+            searchFilter, from = startDate
         )
 
         return DayLessonsCalculator.calculateDayLessonsForNextDays(lessons.data, startDate, days)
     }
 
 
-    fun dayLessonById(
+    fun regularLessonById(
         id: String,
     ) =
         regularRepo.get(id)

@@ -7,7 +7,7 @@ import ru.mtuci.core.RegularLessonsRepository
 import ru.mtuci.models.LessonType
 import ru.mtuci.models.RegularLesson
 import ru.mtuci.models.RegularLessonsPagination
-import ru.mtuci.utils.DayLessonsCalculator
+import ru.mtuci.calculators.DayLessonsCalculator
 
 class MongoRegularLessonsRepository(database: MongoDatabase) :
     MongoBaseRepository<RegularLesson>(database, RegularLesson::class.java),

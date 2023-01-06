@@ -19,4 +19,24 @@ data class DayLesson(
     @GraphQLName("regularLesson")
     fun getRegularLesson() = koin.getRepository<RegularLesson>().get(regularLessonId)
 
+    override fun hashCode(): Int {
+        var result = startTime.hashCode()
+        result = 31 * result + endTime.hashCode()
+        result = 31 * result + regularLessonId.hashCode()
+        return result
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as DayLesson
+
+        if (startTime != other.startTime) return false
+        if (endTime != other.endTime) return false
+        if (regularLessonId != other.regularLessonId) return false
+
+        return true
+    }
+
 }

@@ -3,7 +3,7 @@ package ru.mtuci.db
 import com.mongodb.client.MongoDatabase
 import ru.mtuci.core.BaseRepository
 import ru.mtuci.core.RepositoryFactory
-import ru.mtuci.models.BaseDocument
+import ru.mtuci.models.common.BaseDocument
 import kotlin.reflect.KClass
 
 class MongoRepositoryFactory(

@@ -9,24 +9,57 @@ import kotlin.reflect.full.starProjectedType
 
 object Config {
 
+    // db
     var MONGO_URL = "mongodb://localhost"
+
+    // email
     var SMTP_HOST = "smtp.mail.ru"
     var SMTP_PORT = "465"
     var IMAP_HOST = "imap.mail.ru"
     var IMAP_PORT = "993"
     var MAIL_USERNAME = ""
+        get() {
+            if (field.isEmpty()) {
+                throw IllegalStateException("S3_ACCESS_KEY is empty")
+            }
+            return field
+        }
     var MAIL_PASSWORD = ""
+        get() {
+            if (field.isEmpty()) {
+                throw IllegalStateException("S3_ACCESS_KEY is empty")
+            }
+            return field
+        }
+
+    // s3
+    var S3_ACCESS_KEY = ""
+        get() {
+            if (field.isEmpty()) {
+                throw IllegalStateException("S3_ACCESS_KEY is empty")
+            }
+            return field
+        }
+    var S3_SECRET_KEY = ""
+        get() {
+            if (field.isEmpty()) {
+                throw IllegalStateException("S3_SECRET_KEY is empty")
+            }
+            return field
+        }
+    var S3_ENDPOINT = "https://storage.yandexcloud.net"
+
+    // app
     var APP_BASE_PATH = "./"
+    var APP_BASE_URL = "http://localhost:8080"
+    var APP_BASE_URL_ICS = "$APP_BASE_URL/ics"
 
     init {
         val env = System.getenv()
-        this::class.memberProperties
-            .filter { it.visibility == KVisibility.PUBLIC }
+        this::class.memberProperties.filter { it.visibility == KVisibility.PUBLIC }
             .filter { it.returnType.isSubtypeOf(String::class.starProjectedType) }
-            .filterIsInstance<KMutableProperty<*>>()
-            .forEach { prop ->
-                if (env.containsKey(prop.name))
-                    prop.setter.call(this, env[prop.name])
+            .filterIsInstance<KMutableProperty<*>>().forEach { prop ->
+                if (env.containsKey(prop.name)) prop.setter.call(this, env[prop.name])
             }
         if (!isValid()) error("BAD ENV CONFIG")
     }

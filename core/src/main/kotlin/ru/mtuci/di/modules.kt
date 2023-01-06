@@ -4,6 +4,7 @@ import org.koin.core.qualifier.TypeQualifier
 import org.koin.dsl.module
 import org.litote.kmongo.KMongo
 import ru.mtuci.Config
+import ru.mtuci.calculators.FilterHashCalculator
 import ru.mtuci.core.*
 import ru.mtuci.db.*
 import ru.mtuci.models.*
@@ -35,11 +36,19 @@ object CoreModules {
         ///Rooms
         single<RoomsRepository> { MongoRoomsRepository(get()) }
         single<BaseRepository<Room>>(TypeQualifier(Room::class)) { get<RoomsRepository>() }
+
+        ///CalendarData
+        single<CalendarDataRepository> { MongoCalendarDataRepository(get()) }
+        single<BaseRepository<CalendarData>>(TypeQualifier(CalendarData::class)) { get<CalendarDataRepository>() }
     }
 
     val mongo = module {
         single { KMongo.createClient(Config.MONGO_URL).getDatabase("mtuci-rasp") }
         single<RepositoryFactory> { MongoRepositoryFactory(get()) }
+    }
+
+    val utils = module {
+        single { FilterHashCalculator(get(), get(), get(), get()) }
     }
 
 }

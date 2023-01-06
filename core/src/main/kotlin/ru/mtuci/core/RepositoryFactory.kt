@@ -1,6 +1,6 @@
 package ru.mtuci.core
 
-import ru.mtuci.models.BaseDocument
+import ru.mtuci.models.common.BaseDocument
 import kotlin.reflect.KClass
 
 interface RepositoryFactory {

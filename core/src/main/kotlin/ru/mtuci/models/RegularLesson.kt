@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import org.bson.codecs.pojo.annotations.BsonIgnore
 import ru.mtuci.di.getRepository
 import ru.mtuci.di.koin
+import ru.mtuci.models.common.BaseDocument
 
 class RegularLesson : BaseDocument() {
 
