@@ -9,12 +9,10 @@ import aws.smithy.kotlin.runtime.http.Url
 import ru.mtuci.Config
 import java.io.File
 
-class S3IcsStorage(
-    val client: S3Client,
-) : IcsStorage {
+class S3IcsStorage() : IcsStorage {
 
     private suspend fun getClient(): S3Client {
-        return S3Client.fromEnvironment {
+        return S3Client {
             endpointUrl = Url.parse(Config.S3_ENDPOINT)
             region = Config.S3_REGION
             credentialsProvider = StaticCredentialsProvider {
@@ -30,7 +28,8 @@ class S3IcsStorage(
             key = "ics/$id.ics"
         }
         return try {
-            getClient().use {
+            val client = getClient()
+            client.use {
                 it.getObjectAcl(request)
             }
             client.config.endpointUrl.toString() + "/" + Config.S3_BUCKET + "/" + "ics/$id.ics"
@@ -46,7 +45,8 @@ class S3IcsStorage(
             metadata = mapOf("Content-Type" to "text/calendar")
             body = ics.asByteStream()
         }
-        getClient().use {
+        val client = getClient()
+        client.use {
             it.putObject(request)
         }
         return client.config.endpointUrl.toString() + "/" + Config.S3_BUCKET + "/" + "ics/$id.ics"

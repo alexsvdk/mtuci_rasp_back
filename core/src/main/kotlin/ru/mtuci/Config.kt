@@ -56,13 +56,22 @@ object Config {
     var APP_BASE_URL = "http://localhost:8080"
     var APP_BASE_URL_ICS = "$APP_BASE_URL/ics"
     var CALCULATOR_VERSION = 1
+    var PORT = 8080
 
     init {
         val env = System.getenv()
+        // strings
         this::class.memberProperties.filter { it.visibility == KVisibility.PUBLIC }
             .filter { it.returnType.isSubtypeOf(String::class.starProjectedType) }
             .filterIsInstance<KMutableProperty<*>>().forEach { prop ->
                 if (env.containsKey(prop.name)) prop.setter.call(this, env[prop.name])
+            }
+
+        // ints
+        this::class.memberProperties.filter { it.visibility == KVisibility.PUBLIC }
+            .filter { it.returnType.isSubtypeOf(Int::class.starProjectedType) }
+            .filterIsInstance<KMutableProperty<*>>().forEach { prop ->
+                if (env.containsKey(prop.name)) prop.setter.call(this, env[prop.name]?.toInt())
             }
         if (!isValid()) error("BAD ENV CONFIG")
     }

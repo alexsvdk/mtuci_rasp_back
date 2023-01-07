@@ -111,7 +111,8 @@ class IcsCalculator(
             calendar.add(event)
         }
 
-        calendarData.savedFiltersRevisionsHash = filterHashCalculator.getFilterHash(calendarData.searchFilter)
+        calendarData.filtersRevisionsHash = filterHashCalculator.getFilterHash(calendarData.searchFilter)
+        calendarData.savedFiltersRevisionsHash = calendarData.filtersRevisionsHash
         calendarData.calculatorVersion = Config.CALCULATOR_VERSION
         calendarData.save()
 

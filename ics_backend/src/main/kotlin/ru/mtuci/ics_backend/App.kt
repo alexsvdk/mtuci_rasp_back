@@ -4,6 +4,7 @@ import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.server.plugins.*
+import io.ktor.server.plugins.callloging.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import ru.mtuci.Config
@@ -15,10 +16,17 @@ import ru.mtuci.ics_backend.storage.IcsStorage
 
 fun main() {
     koin.loadModules(listOf(icsModule))
-    embeddedServer(Netty, port = 8080, host = "0.0.0.0", module = Application::icsServerModule).start(wait = true)
+    embeddedServer(
+        Netty,
+        port = Config.PORT,
+        host = "0.0.0.0",
+        module = Application::icsServerModule,
+    ).start(wait = true)
 }
 
 fun Application.icsServerModule() {
+    install(CallLogging)
+
     val icsStorage = koin.get<IcsStorage>()
     val calculator = koin.get<IcsCalculator>()
     val calendarDataRepository = koin.get<CalendarDataRepository>()

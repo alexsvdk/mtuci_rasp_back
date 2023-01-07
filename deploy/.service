@@ -1,5 +1,5 @@
 [Unit]
-Description=MTUCI Rasp parser
+Description=%DESC%
 After=network.target
 StartLimitIntervalSec=0
 

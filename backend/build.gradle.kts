@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.konan.properties.Properties
-
 val graphqlVersion = rootProject.properties["graphql_version"]
 
 plugins {
@@ -14,33 +12,16 @@ dependencies {
     implementation("com.graphql-java:graphql-java-extended-scalars:20.0")
 }
 
+repositories {
+    mavenCentral()
+}
+
 application {
     mainClass.set("ru.mtuci.backend.AppKt")
 }
 
-task("buildService") {
-    val properties = Properties()
-    properties.load(File(rootProject.projectDir, "local.properties").reader())
-
-    val mongoUrl = properties.getProperty("mongo_url")
-    val serverPath = properties.getProperty("server_path")
-    val serverUser = properties.getProperty("server_user")
-
-    if (!buildDir.exists()) {
-        buildDir.mkdirs()
+tasks {
+    register<Ru_mtuci_kotlin_build_service_task_gradle.BuildServiceTask>("buildService") {
+        serviceDesc.set("MTUCI Backend service")
     }
-
-    val fileTo = File(buildDir, "mtuci-rasp-backend.service")
-    val fileFrom = File(projectDir, "deploy/.service")
-
-    val res = fileFrom.readText()
-        .replace("%ENV%", "MONGO_URL=$mongoUrl")
-        .replace("%JAR%", "$serverPath/jar/backend.jar")
-        .replace("%USER%", serverUser)
-
-    if (fileTo.exists()) {
-        fileTo.delete()
-    }
-    fileTo.createNewFile()
-    fileTo.writeText(res)
 }

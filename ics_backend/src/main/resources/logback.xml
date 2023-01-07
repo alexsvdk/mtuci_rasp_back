@@ -1,14 +1,16 @@
-<configuration scan="true">
-    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
-
+<configuration>
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>${CONSOLE_LOG_PATTERN}</pattern>
-            <charset>utf8</charset>
+            <pattern>%d{YYYY-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
         </encoder>
     </appender>
-    <root level="info">
+    <root level="INFO">
         <appender-ref ref="STDOUT"/>
     </root>
+    <logger name="io.netty" level="INFO"/>
     <logger name="org.mongodb.driver" level="ERROR"/>
+    <logger name="n.f.ical4j.data" level="ERROR"/>
+    <logger name="n.f.ical4j" level="ERROR"/>
+    <logger name="net.fortuna.ical4j" level="ERROR"/>
+    <logger name="net.fortuna.ical4j.model" level="ERROR"/>
 </configuration>
