@@ -26,17 +26,23 @@ class RawRepeatedLesson(
     var group: Group? = null
 
 
-    fun buildLesson(): RegularLesson = RegularLesson().also {
-        it.lessonType = getLessonType()
-        it.teacherId = getTeacher()?.id
-        it.disciplineId = getDiscipline()?.id
-        it.tweekDay = day
-        it.lessonNum = num
-        it.dateFrom = getStartTime()
-        it.dateTo = getEndTime()
-        it.roomId = getRooms()?.id
-        it.tags = getTags()
+    fun buildLesson(): BuildLessonResult = BuildLessonResult().apply {
+        teacher =  getTeacher()
+        discipline = getDiscipline()
+        room = getRooms()
+        regularLesson = RegularLesson().also {
+            it.lessonType = getLessonType()
+            it.teacherId = teacher?.id
+            it.disciplineId = discipline?.id
+            it.tweekDay = day
+            it.lessonNum = num
+            it.dateFrom = getStartTime()
+            it.dateTo = getEndTime()
+            it.roomId = room?.id
+            it.tags = getTags()
+        }
     }
+
 
     private fun getLessonType() = when (type?.lowercase()?.replace(".", "")) {
         "л" -> LessonType.LECTURE

@@ -16,6 +16,7 @@ dependencies {
     implementation("io.ktor:ktor-server-core:$ktorVersion")
     implementation("io.ktor:ktor-server-netty:$ktorVersion")
     implementation("io.ktor:ktor-server-call-logging:$ktorVersion")
+    implementation("io.ktor:ktor-server-cors-jvm:$ktorVersion")
     implementation("aws.sdk.kotlin:s3:0.19.2-beta")
     implementation("org.mnode.ical4j:ical4j:4.0.0-beta5")
 }

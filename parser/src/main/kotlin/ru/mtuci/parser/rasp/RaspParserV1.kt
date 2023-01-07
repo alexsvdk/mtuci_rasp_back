@@ -2,6 +2,8 @@ package ru.mtuci.parser.rasp
 
 import org.apache.poi.ss.usermodel.Row
 import org.apache.poi.ss.usermodel.Sheet
+import ru.mtuci.calculators.FilterHashCalculator
+import ru.mtuci.core.CalendarDataRepository
 import ru.mtuci.core.DirectionsRepository
 import ru.mtuci.core.GroupsRepository
 import ru.mtuci.models.Direction
@@ -13,6 +15,8 @@ import java.util.logging.Logger
 class RaspParserV1(
     private val groupsRepo: GroupsRepository,
     private val directionsRepo: DirectionsRepository,
+    private val calendarDataRepo: CalendarDataRepository,
+    private val filterHashCalculator: FilterHashCalculator,
 
     ) : RaspParser {
     override fun canParse(sheet: Sheet): Boolean {
@@ -25,6 +29,8 @@ class RaspParserV1(
         val direction = getDirectionByName(sheet.getRow(10).getCell(0).stringCellValue)
 
         group.directionId = direction.id
+        group.incrementRevision()
+
         val matches =
             RaspParserConstants.dateRex.findAll(sheet.getRow(12).getCell(0).stringCellValue).map { it.value }
                 .toList()
@@ -61,15 +67,48 @@ class RaspParserV1(
             )
         }
 
-        val lessons = rawLessons.map {
+        val buildLessonResults = rawLessons.map {
             it.group = group
             it.buildLesson()
         }
+
+        val lessons = buildLessonResults.mapNotNull { it.regularLesson }
+
         lessons.forEach {
             it.dateFrom = it.dateFrom ?: termStartDate
             it.dateTo = it.dateTo ?: termEndDate
         }
 
+        //affected teachers
+        val afectedTeachers = buildLessonResults.mapNotNull { it.teacher }.distinctBy { it.id }
+        afectedTeachers.forEach {
+            it.incrementRevision()
+            it.save()
+        }
+
+        //affected disciplines
+        val afectedDisciplines = buildLessonResults.mapNotNull { it.discipline }.distinctBy { it.id }
+        afectedDisciplines.forEach {
+            it.incrementRevision()
+            it.save()
+        }
+
+        //affected rooms
+        val afectedRooms = buildLessonResults.mapNotNull { it.room }.distinctBy { it.id }
+        afectedRooms.forEach {
+            it.incrementRevision()
+            it.save()
+        }
+
+        calendarDataRepo.findByAnyOf(
+            afectedTeachers.mapNotNull { it.id },
+            afectedDisciplines.mapNotNull { it.id },
+            afectedRooms.mapNotNull { it.id },
+            listOf(group.id!!)
+        ).forEach {
+            it.filtersRevisionsHash = filterHashCalculator.getFilterHash(it.searchFilter)
+            it.save()
+        }
 
         return RaspParseResult(lessons, group, termStartDate, termEndDate)
     }

@@ -8,7 +8,7 @@ import ru.mtuci.parser.rasp.RaspParserV1
 
 val parserModule = module {
 
-    single { RaspParserV1(get(), get()) }
+    single { RaspParserV1(get(), get(), get(), get()) }
 
     single<List<RaspParser>> {
         listOf(

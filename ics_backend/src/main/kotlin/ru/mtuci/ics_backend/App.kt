@@ -1,10 +1,12 @@
 package ru.mtuci.ics_backend
 
+import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.server.plugins.*
 import io.ktor.server.plugins.callloging.*
+import io.ktor.server.plugins.cors.routing.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import ru.mtuci.Config
@@ -26,6 +28,15 @@ fun main() {
 
 fun Application.icsServerModule() {
     install(CallLogging)
+    install(CORS) {
+        allowMethod(HttpMethod.Options)
+        allowMethod(HttpMethod.Put)
+        allowMethod(HttpMethod.Delete)
+        allowMethod(HttpMethod.Patch)
+        allowHeader(HttpHeaders.Authorization)
+        allowHeader("MyCustomHeader")
+        anyHost() // @TODO: Don't do this in production if possible. Try to limit it.
+    }
 
     val icsStorage = koin.get<IcsStorage>()
     val calculator = koin.get<IcsCalculator>()
