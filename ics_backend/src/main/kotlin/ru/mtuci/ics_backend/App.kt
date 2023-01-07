@@ -30,11 +30,22 @@ fun Application.icsServerModule() {
     install(CallLogging)
     install(CORS) {
         allowMethod(HttpMethod.Options)
-        allowMethod(HttpMethod.Put)
-        allowMethod(HttpMethod.Delete)
-        allowMethod(HttpMethod.Patch)
+        allowMethod(HttpMethod.Get)
         allowHeader(HttpHeaders.Authorization)
-        allowHeader("MyCustomHeader")
+        allowHeader("DNT")
+        allowHeader("User-Agent")
+        allowHeader("X-Requested-With")
+        allowHeader("If-Modified-Since")
+        allowHeader("Cache-Control")
+        allowHeader("Content-Type")
+        allowHeader("Range")
+        allowHeader("X-Forwarded-For")
+        allowHeader("X-Forwarded-Proto")
+        allowHeader("Front-End-Https")
+        allowHeader("X-Http-Method-Override")
+        allowHeader("X-ATT-DeviceId")
+        allowHeader("X-Wap-Profile")
+        allowHeader("Proxy-Connection")
         anyHost() // @TODO: Don't do this in production if possible. Try to limit it.
     }
 

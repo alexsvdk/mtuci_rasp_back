@@ -2,12 +2,12 @@ package ru.mtuci.backend.graphql
 
 import com.expediagroup.graphql.server.operations.Query
 import org.springframework.stereotype.Component
+import ru.mtuci.calculators.DayLessonsCalculator
 import ru.mtuci.core.RegularLessonsRepository
 import ru.mtuci.di.koin
 import ru.mtuci.models.DayLesson
 import ru.mtuci.models.RegularLessonsPagination
 import ru.mtuci.models.SearchFilter
-import ru.mtuci.calculators.DayLessonsCalculator
 import java.util.*
 
 @Component
@@ -62,7 +62,7 @@ class LessonsQuery : Query {
         val days = days ?: 1
         val startDate = startDate ?: Date().time
 
-        if (startDate > 0)
+        if (startDate < 0)
             throw IllegalArgumentException("Start date must be positive")
         if (searchFilter.isEmpty())
             throw IllegalArgumentException("Search filter must not be empty")
