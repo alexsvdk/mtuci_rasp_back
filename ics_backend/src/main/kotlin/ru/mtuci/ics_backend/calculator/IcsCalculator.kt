@@ -133,10 +133,10 @@ class IcsCalculator(
             LECTURE -> "📚"
             PRACTICE -> "🔧"
             LABORATORY -> "🧪"
-            EXAM -> ""
+            EXAM -> "🔴"
             SPORT -> "🏃"
-            CONSULTATION -> "🤔"
-            else -> "❓"
+            CONSULTATION -> "🔵"
+            else -> ""
         }
     }
 

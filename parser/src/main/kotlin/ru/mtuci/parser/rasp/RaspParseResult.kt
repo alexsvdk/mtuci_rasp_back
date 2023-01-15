@@ -46,7 +46,7 @@ data class RaspParseResult<T : BaseLesson>(
         ): RaspParseResult<T> {
             val minDate = res.mapNotNull { it.lesson?.dateFrom }.minOrNull()
             val maxDate = res.mapNotNull { it.lesson?.dateTo }.maxOrNull()
-            val lessons = res.mapNotNull { it.lesson }.distinctById()
+            val lessons = res.mapNotNull { it.lesson }
             val teachers = res.mapNotNull { it.teacher }.distinctById()
             val rooms = res.mapNotNull { it.room }.distinctById()
             val disciplines = res.mapNotNull { it.discipline }.distinctById()

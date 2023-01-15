@@ -67,8 +67,8 @@ fun Application.icsServerModule() {
         get("/{id}") {
             val id = call.parameters["id"]?.substringBefore(".ics") ?: throw NotFoundException()
             val calendarData = calendarDataRepository.get(id) ?: throw NotFoundException()
-            val isValid = false
-            //  calendarData.filtersRevisionsHash == calendarData.savedFiltersRevisionsHash && calendarData.calculatorVersion == Config.CALCULATOR_VERSION
+            val isValid = calendarData.filtersRevisionsHash == calendarData.savedFiltersRevisionsHash
+                    && calendarData.calculatorVersion == Config.CALCULATOR_VERSION
             val icsUrl = (if (isValid) icsStorage.getUrlById(id) else null) ?: run {
                 val icsFile = calculator.createIcsFile(id)
                 val url = icsStorage.uploadIcs(id, icsFile)

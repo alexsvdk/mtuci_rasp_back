@@ -2,7 +2,6 @@ package ru.mtuci.parser.rasp
 
 import org.apache.poi.ss.usermodel.Workbook
 import remove
-import ru.mtuci.calculators.FilterHashCalculator
 import ru.mtuci.core.CalendarDataRepository
 import ru.mtuci.core.LessonsRepository
 import ru.mtuci.parser.rasp.parsers.RaspParser
@@ -13,14 +12,14 @@ class RaspParserManager(
     private val parsers: List<RaspParser<*>>,
     private val lessonsRepo: LessonsRepository,
     private val calendarDataRepo: CalendarDataRepository,
-    private val filterHashCalculator: FilterHashCalculator,
 ) {
     fun parseRasp(xss: Workbook, logger: Logger) {
         for (sheet in xss) {
 
             try {
 
-                val res = parsers.firstOrNull { it.canParse(sheet) }?.parse(sheet, logger)
+                val parser = parsers.firstOrNull { it.canParse(sheet) }
+                val res = parser?.parse(sheet, logger)
 
                 if (res != null) {
                     logger.info("Найдено занятий: ${res.lessons.size}")
@@ -68,7 +67,7 @@ class RaspParserManager(
                     res.affectedRooms.mapNotNull { it.id },
                     listOf(group.id!!)
                 ).forEach {
-                    it.filtersRevisionsHash = filterHashCalculator.getFilterHash(it.searchFilter)
+                    it.filtersRevisionsHash++
                     it.save()
                 }
 

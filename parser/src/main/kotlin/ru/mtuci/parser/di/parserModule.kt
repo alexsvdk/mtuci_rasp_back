@@ -16,7 +16,7 @@ val parserModule = module {
         )
     }
 
-    single { RaspParserManager(get(), get(), get(), get()) }
+    single { RaspParserManager(get(), get(), get()) }
 
     single { MailHandler(get()) }
 
