@@ -8,6 +8,7 @@ import ru.mtuci.calculators.FilterHashCalculator
 import ru.mtuci.core.*
 import ru.mtuci.db.*
 import ru.mtuci.models.*
+import ru.mtuci.models.lessons.BaseLesson
 
 object CoreModules {
 
@@ -30,8 +31,8 @@ object CoreModules {
         single<BaseRepository<Direction>>(TypeQualifier(Direction::class)) { get<DirectionsRepository>() }
 
         ///Lessons
-        single<RegularLessonsRepository> { MongoRegularLessonsRepository(get()) }
-        single<BaseRepository<RegularLesson>>(TypeQualifier(RegularLesson::class)) { get<RegularLessonsRepository>() }
+        single<LessonsRepository> { MongoLessonsRepository(get()) }
+        single<BaseRepository<BaseLesson>>(TypeQualifier(BaseLesson::class)) { get<LessonsRepository>() }
 
         ///Rooms
         single<RoomsRepository> { MongoRoomsRepository(get()) }

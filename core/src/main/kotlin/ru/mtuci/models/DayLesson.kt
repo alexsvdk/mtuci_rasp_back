@@ -6,23 +6,24 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import org.bson.codecs.pojo.annotations.BsonId
 import ru.mtuci.di.getRepository
 import ru.mtuci.di.koin
+import ru.mtuci.models.lessons.BaseLesson
 
 @GraphQLDescription("Занятие, которое состоится в конкретный день, в конкретное время")
 data class DayLesson(
     val startTime: Long,
     val endTime: Long,
-    val regularLessonId: String,
+    val lessonId: String,
 ) {
 
     @JsonIgnore
     @BsonId
     @GraphQLName("regularLesson")
-    fun getRegularLesson() = koin.getRepository<RegularLesson>().get(regularLessonId)
+    fun getRegularLesson() = koin.getRepository<BaseLesson>().get(lessonId)
 
     override fun hashCode(): Int {
         var result = startTime.hashCode()
         result = 31 * result + endTime.hashCode()
-        result = 31 * result + regularLessonId.hashCode()
+        result = 31 * result + lessonId.hashCode()
         return result
     }
 
@@ -34,7 +35,7 @@ data class DayLesson(
 
         if (startTime != other.startTime) return false
         if (endTime != other.endTime) return false
-        if (regularLessonId != other.regularLessonId) return false
+        if (lessonId != other.lessonId) return false
 
         return true
     }

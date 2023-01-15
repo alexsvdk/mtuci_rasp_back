@@ -6,4 +6,5 @@ build
 
 local.properties
 prod.env
+dev.env
 archive

@@ -14,8 +14,9 @@ import ru.mtuci.Config
 import ru.mtuci.calculators.DayLessonsCalculator
 import ru.mtuci.calculators.FilterHashCalculator
 import ru.mtuci.core.CalendarDataRepository
-import ru.mtuci.core.RegularLessonsRepository
+import ru.mtuci.core.LessonsRepository
 import ru.mtuci.models.LessonType
+import ru.mtuci.models.LessonType.*
 import ru.mtuci.models.Room
 import ru.mtuci.models.RoomLocation
 import save
@@ -27,7 +28,7 @@ import java.util.*
 
 class IcsCalculator(
     val calendarRepo: CalendarDataRepository,
-    val lessonsRepository: RegularLessonsRepository,
+    val lessonsRepository: LessonsRepository,
     val filterHashCalculator: FilterHashCalculator,
 ) {
 
@@ -51,7 +52,7 @@ class IcsCalculator(
 
     fun createIcsFile(id: String): File {
         val calendarData = calendarRepo.get(id) ?: throw NotFoundException()
-        val lessons = lessonsRepository.findRegularLessons(calendarData.searchFilter).data
+        val lessons = lessonsRepository.findLessons(calendarData.searchFilter).data
 
         val calendar = Calendar()
         calendar.add(ProdId("-//MTUCI//iCal4j 1.0//RU"))
@@ -129,23 +130,25 @@ class IcsCalculator(
 
     private fun mapLessonTypeToEmoji(type: LessonType): String {
         return when (type) {
-            LessonType.LECTURE -> "📚"
-            LessonType.PRACTICE -> "🔧"
-            LessonType.LABORATORY -> "🧪"
-            LessonType.EXAM -> "📝"
-            LessonType.UNKNOWN -> "📝"
-            LessonType.SPORT -> "🏃"
+            LECTURE -> "📚"
+            PRACTICE -> "🔧"
+            LABORATORY -> "🧪"
+            EXAM -> ""
+            SPORT -> "🏃"
+            CONSULTATION -> "🤔"
+            else -> "❓"
         }
     }
 
     private fun mapLessonTypeToColor(type: LessonType): String {
         return when (type) {
-            LessonType.LECTURE -> "#FF0000"
-            LessonType.PRACTICE -> "#00FF00"
-            LessonType.LABORATORY -> "#0000FF"
-            LessonType.EXAM -> "#FF00FF"
-            LessonType.UNKNOWN -> "#FF00FF"
-            LessonType.SPORT -> "#00FFFF"
+            LECTURE -> "#FF0000"
+            PRACTICE -> "#00FF00"
+            LABORATORY -> "#0000FF"
+            EXAM -> "#FF00FF"
+            UNKNOWN -> "#FF00FF"
+            SPORT -> "#00FFFF"
+            CONSULTATION -> "#FFFF00"
         }
     }
 

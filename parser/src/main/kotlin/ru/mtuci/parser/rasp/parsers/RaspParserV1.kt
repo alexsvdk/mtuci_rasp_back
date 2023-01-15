@@ -1,13 +1,14 @@
-package ru.mtuci.parser.rasp
+package ru.mtuci.parser.rasp.parsers
 
 import org.apache.poi.ss.usermodel.Row
 import org.apache.poi.ss.usermodel.Sheet
-import ru.mtuci.calculators.FilterHashCalculator
-import ru.mtuci.core.CalendarDataRepository
 import ru.mtuci.core.DirectionsRepository
 import ru.mtuci.core.GroupsRepository
 import ru.mtuci.models.Direction
 import ru.mtuci.models.Group
+import ru.mtuci.models.lessons.RegularLesson
+import ru.mtuci.parser.rasp.RaspParseResult
+import ru.mtuci.parser.rasp.RaspParserConstants
 import save
 import java.util.*
 import java.util.logging.Logger
@@ -15,16 +16,13 @@ import java.util.logging.Logger
 class RaspParserV1(
     private val groupsRepo: GroupsRepository,
     private val directionsRepo: DirectionsRepository,
-    private val calendarDataRepo: CalendarDataRepository,
-    private val filterHashCalculator: FilterHashCalculator,
-
-    ) : RaspParser {
+) : RaspParser<RegularLesson> {
     override fun canParse(sheet: Sheet): Boolean {
         val str = sheet.getRow(7).getCell(0).stringCellValue
         return str.contains("Расписание", ignoreCase = true)
     }
 
-    override fun parse(sheet: Sheet, logger: Logger): RaspParseResult {
+    override fun parse(sheet: Sheet, logger: Logger): RaspParseResult<RegularLesson> {
         val group = getGroupByName(sheet.sheetName)
         val direction = getDirectionByName(sheet.getRow(10).getCell(0).stringCellValue)
 
@@ -59,7 +57,7 @@ class RaspParserV1(
                 }"
             )
 
-        val rawLessons = mutableListOf<RawRepeatedLesson>()
+        val rawLessons = mutableListOf<RawLesson>()
 
         for (day in 0..5) for (lessonNum in 0..4) {
             rawLessons.addAll(
@@ -69,55 +67,25 @@ class RaspParserV1(
 
         val buildLessonResults = rawLessons.map {
             it.group = group
-            it.buildLesson()
+            it.buildRegularLesson()
         }
 
-        val lessons = buildLessonResults.mapNotNull { it.regularLesson }
+        val lessons = buildLessonResults.mapNotNull { it.lesson }
 
         lessons.forEach {
             it.dateFrom = it.dateFrom ?: termStartDate
             it.dateTo = it.dateTo ?: termEndDate
         }
 
-        //affected teachers
-        val afectedTeachers = buildLessonResults.mapNotNull { it.teacher }.distinctBy { it.id }
-        afectedTeachers.forEach {
-            it.incrementRevision()
-            it.save()
-        }
 
-        //affected disciplines
-        val afectedDisciplines = buildLessonResults.mapNotNull { it.discipline }.distinctBy { it.id }
-        afectedDisciplines.forEach {
-            it.incrementRevision()
-            it.save()
-        }
-
-        //affected rooms
-        val afectedRooms = buildLessonResults.mapNotNull { it.room }.distinctBy { it.id }
-        afectedRooms.forEach {
-            it.incrementRevision()
-            it.save()
-        }
-
-        calendarDataRepo.findByAnyOf(
-            afectedTeachers.mapNotNull { it.id },
-            afectedDisciplines.mapNotNull { it.id },
-            afectedRooms.mapNotNull { it.id },
-            listOf(group.id!!)
-        ).forEach {
-            it.filtersRevisionsHash = filterHashCalculator.getFilterHash(it.searchFilter)
-            it.save()
-        }
-
-        return RaspParseResult(lessons, group, termStartDate, termEndDate)
+        return RaspParseResult.fromBuildRes(buildLessonResults, group, termStartDate, termEndDate)
     }
 
-    private fun parseRawLessons(row: Row, day: Int): List<RawRepeatedLesson> {
+    private fun parseRawLessons(row: Row, day: Int): List<RawLesson> {
 
         //left
         val raw1 = try {
-            RawRepeatedLesson(day).apply {
+            RawLesson(day).apply {
                 name = row.getCell(6).stringCellValue.trim()
                 teacher = row.getCell(5).stringCellValue.trim()
                 type = row.getCell(4).stringCellValue.trim()
@@ -130,7 +98,7 @@ class RaspParserV1(
 
         //right
         val raw2 = try {
-            RawRepeatedLesson(day + 7).apply {
+            RawLesson(day + 7).apply {
                 name = row.getCell(7).stringCellValue.trim()
                 teacher = row.getCell(8).stringCellValue.trim()
                 type = row.getCell(9).stringCellValue.trim()
@@ -141,7 +109,7 @@ class RaspParserV1(
             null
         }
 
-        return mutableListOf<RawRepeatedLesson>().apply {
+        return mutableListOf<RawLesson>().apply {
             if (raw1?.name?.isNotEmpty() == true) add(raw1)
             if (raw2?.name?.isNotEmpty() == true) add(raw2)
         }

@@ -13,10 +13,12 @@ repositories {
 
 dependencies {
     implementation(project(":core"))
-    implementation("io.ktor:ktor-server-core:$ktorVersion")
-    implementation("io.ktor:ktor-server-netty:$ktorVersion")
-    implementation("io.ktor:ktor-server-call-logging:$ktorVersion")
+    implementation("io.ktor:ktor-server-core-jvm:$ktorVersion")
+    implementation("io.ktor:ktor-server-netty-jvm:$ktorVersion")
+    implementation("io.ktor:ktor-server-call-logging-jvm:$ktorVersion")
     implementation("io.ktor:ktor-server-cors-jvm:$ktorVersion")
+    implementation("io.ktor:ktor-server-host-common-jvm:$ktorVersion")
+    implementation("io.ktor:ktor-server-status-pages-jvm:$ktorVersion")
     implementation("aws.sdk.kotlin:s3:0.19.2-beta")
     implementation("org.mnode.ical4j:ical4j:4.0.0-beta5")
 }

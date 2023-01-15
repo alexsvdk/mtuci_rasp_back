@@ -1,20 +1,28 @@
-package ru.mtuci.parser.rasp
+package ru.mtuci.parser.rasp.parsers
 
+import ru.mtuci.calculators.DayLessonsCalculator
 import ru.mtuci.core.DisciplinesRepository
 import ru.mtuci.core.RoomsRepository
 import ru.mtuci.core.TeachersRepository
 import ru.mtuci.di.koin
 import ru.mtuci.models.*
+import ru.mtuci.models.lessons.BaseLesson
+import ru.mtuci.models.lessons.RegularLesson
+import ru.mtuci.parser.rasp.BuildLessonResult
+import ru.mtuci.parser.rasp.RaspParserConstants
 import ru.mtuci.parser.rasp.RaspParserConstants.dateFRex
 import ru.mtuci.parser.rasp.RaspParserConstants.dateFormat
+import ru.mtuci.parser.rasp.RaspParserConstants.datePartRex
 import ru.mtuci.parser.rasp.RaspParserConstants.dateRex
 import ru.mtuci.parser.rasp.RaspParserConstants.ends
 import ru.mtuci.parser.rasp.RaspParserConstants.innerRex
 import ru.mtuci.parser.rasp.RaspParserConstants.starts
+import ru.mtuci.parser.rasp.RaspParserConstants.yearRex
+import java.util.*
 
 
-class RawRepeatedLesson(
-    var day: Int
+class RawLesson(
+    var day: Int? = null
 ) {
 
     /// raw data
@@ -25,12 +33,17 @@ class RawRepeatedLesson(
     var room: String? = null
     var group: Group? = null
 
+    var date: String? = null
+    var time: String? = null
+    var studyYear: String? = null
+    var sheetTitle: String? = null
 
-    fun buildLesson(): BuildLessonResult = BuildLessonResult().apply {
+
+    fun buildRegularLesson() = BuildLessonResult<RegularLesson>().apply {
         teacher =  getTeacher()
         discipline = getDiscipline()
         room = getRooms()
-        regularLesson = RegularLesson().also {
+        lesson = RegularLesson().also {
             it.lessonType = getLessonType()
             it.teacherId = teacher?.id
             it.disciplineId = discipline?.id
@@ -43,12 +56,29 @@ class RawRepeatedLesson(
         }
     }
 
+    fun buildExamLesson() = BuildLessonResult<BaseLesson>().apply {
+        teacher =  getTeacher()
+        discipline = getDiscipline()
+        room = getRooms()
+        lesson = BaseLesson().also {
+            it.lessonType = getLessonType()
+            it.teacherId = teacher?.id
+            it.disciplineId = discipline?.id
+            it.lessonNum = num
+            it.roomId = room?.id
+            it.dateFrom = getStartTime()
+            it.dateTo = getEndTime()
+        }
+    }
+
 
     private fun getLessonType() = when (type?.lowercase()?.replace(".", "")) {
         "л" -> LessonType.LECTURE
         "пр" -> LessonType.PRACTICE
         "лаб" -> LessonType.LABORATORY
         "фв" -> LessonType.SPORT
+        "конс" -> LessonType.CONSULTATION
+        "экзамен" -> LessonType.EXAM
         else -> LessonType.UNKNOWN
     }
 
@@ -117,6 +147,12 @@ class RawRepeatedLesson(
                 }
             }
         }
+        getExamDate()?.let { examDate ->
+            val rawEndTime = time?.substringAfter("-")?.trim()
+            examDate.set(Calendar.HOUR_OF_DAY, rawEndTime?.substringBefore(".")?.toIntOrNull() ?: 0)
+            examDate.set(Calendar.MINUTE, rawEndTime?.substringAfter(".")?.toIntOrNull() ?: 0)
+            return examDate.timeInMillis
+        }
         return null
     }
 
@@ -135,6 +171,13 @@ class RawRepeatedLesson(
                 }
             }
         }
+        getExamDate()?.let { examDate ->
+            val rawStartTime = time?.substringBefore("-")?.trim()
+            examDate.set(Calendar.HOUR_OF_DAY, rawStartTime?.substringBefore(".")?.toIntOrNull() ?: 0)
+            examDate.set(Calendar.MINUTE, rawStartTime?.substringAfter(".")?.toIntOrNull() ?: 0)
+            return examDate.timeInMillis
+        }
+
         return null
     }
 
@@ -148,6 +191,24 @@ class RawRepeatedLesson(
             nameIter = nameIter.substringAfter(')')
         }
         return tags
+    }
+
+    private fun getExamDate(): Calendar? {
+        val years = yearRex.findAll(studyYear ?: "").mapNotNull { it.value.toIntOrNull() }.toList()
+        val startYear = years.firstOrNull() ?: return null
+        val endYear = years.lastOrNull() ?: return null
+        val datePart = datePartRex.find(date ?: "")?.value ?: return null
+        val month = datePart.substring(3, 5).toIntOrNull() ?: return null
+        val year = if (month<9) endYear else startYear
+        val cal = GregorianCalendar(DayLessonsCalculator.timeZone)
+        cal.set(Calendar.YEAR, year)
+        cal.set(Calendar.MONTH, month-1)
+        cal.set(Calendar.DAY_OF_MONTH, datePart.substring(0, 2).toIntOrNull() ?: return null)
+        cal.set(Calendar.HOUR_OF_DAY, 0)
+        cal.set(Calendar.MINUTE, 0)
+        cal.set(Calendar.SECOND, 0)
+        cal.set(Calendar.MILLISECOND, 0)
+        return cal
     }
 
 }

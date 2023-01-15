@@ -7,6 +7,7 @@ import io.ktor.server.netty.*
 import io.ktor.server.plugins.*
 import io.ktor.server.plugins.callloging.*
 import io.ktor.server.plugins.cors.routing.*
+import io.ktor.server.plugins.statuspages.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import ru.mtuci.Config
@@ -27,7 +28,16 @@ fun main() {
 }
 
 fun Application.icsServerModule() {
-    install(CallLogging)
+    install(CallLogging) {
+        level = org.slf4j.event.Level.INFO
+    }
+    install(StatusPages) {
+        exception<Throwable> { call, cause ->
+            cause.printStackTrace()
+            call.respondText(text = "500: $cause", status = HttpStatusCode.InternalServerError)
+        }
+    }
+
     install(CORS) {
         allowMethod(HttpMethod.Options)
         allowMethod(HttpMethod.Get)
@@ -57,8 +67,8 @@ fun Application.icsServerModule() {
         get("/{id}") {
             val id = call.parameters["id"]?.substringBefore(".ics") ?: throw NotFoundException()
             val calendarData = calendarDataRepository.get(id) ?: throw NotFoundException()
-            val isValid =
-                calendarData.filtersRevisionsHash == calendarData.savedFiltersRevisionsHash && calendarData.calculatorVersion == Config.CALCULATOR_VERSION
+            val isValid = false
+            //  calendarData.filtersRevisionsHash == calendarData.savedFiltersRevisionsHash && calendarData.calculatorVersion == Config.CALCULATOR_VERSION
             val icsUrl = (if (isValid) icsStorage.getUrlById(id) else null) ?: run {
                 val icsFile = calculator.createIcsFile(id)
                 val url = icsStorage.uploadIcs(id, icsFile)

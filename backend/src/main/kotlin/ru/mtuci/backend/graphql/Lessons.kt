@@ -3,17 +3,17 @@ package ru.mtuci.backend.graphql
 import com.expediagroup.graphql.server.operations.Query
 import org.springframework.stereotype.Component
 import ru.mtuci.calculators.DayLessonsCalculator
-import ru.mtuci.core.RegularLessonsRepository
+import ru.mtuci.core.LessonsRepository
 import ru.mtuci.di.koin
 import ru.mtuci.models.DayLesson
-import ru.mtuci.models.RegularLessonsPagination
+import ru.mtuci.models.LessonsPagination
 import ru.mtuci.models.SearchFilter
 import java.util.*
 
 @Component
 class LessonsQuery : Query {
 
-    private val regularRepo: RegularLessonsRepository = koin.get()
+    private val regularRepo: LessonsRepository = koin.get()
 
     fun findRegularLessons(
         searchFilter: SearchFilter,
@@ -21,7 +21,7 @@ class LessonsQuery : Query {
         limit: Int? = 50,
         from: Long? = null,
         to: Long? = null,
-    ): RegularLessonsPagination {
+    ): LessonsPagination {
         if ((offset ?: -1) < 0)
             throw IllegalArgumentException("Offset must be positive")
         if ((limit ?: -1) < 0)
@@ -29,7 +29,7 @@ class LessonsQuery : Query {
         if (searchFilter.isEmpty())
             throw IllegalArgumentException("Search filter must not be empty")
 
-        return regularRepo.findRegularLessons(
+        return regularRepo.findLessons(
             searchFilter, offset!!, limit!!, from, to
         )
     }
@@ -47,7 +47,7 @@ class LessonsQuery : Query {
         if (searchFilter.isEmpty())
             throw IllegalArgumentException("Search filter must not be empty")
 
-        val lessons = regularRepo.findRegularLessons(
+        val lessons = regularRepo.findLessons(
             searchFilter, from = startDate, to = endDate,
         )
 
@@ -67,7 +67,7 @@ class LessonsQuery : Query {
         if (searchFilter.isEmpty())
             throw IllegalArgumentException("Search filter must not be empty")
 
-        val lessons = regularRepo.findRegularLessons(
+        val lessons = regularRepo.findLessons(
             searchFilter, from = startDate
         )
 

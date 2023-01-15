@@ -2,6 +2,7 @@ package ru.mtuci.parser.mail
 
 import org.apache.poi.UnsupportedFileFormatException
 import org.apache.poi.ss.usermodel.Workbook
+import org.apache.poi.ss.usermodel.WorkbookFactory
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import ru.mtuci.Config
 import ru.mtuci.parser.log.MailLoggerHandler
@@ -123,11 +124,12 @@ class MailHandler(
                         raspFound = true
                         logger.severe("---")
                         logger.info("Файл: ${file.name}")
-                        val xss: Workbook
+                        var xss: Workbook
                         try {
-                            xss = XSSFWorkbook(file.inputStream())
+                            xss = WorkbookFactory.create(file.inputStream())
                         } catch (e: UnsupportedFileFormatException) {
-                            logger.warning("Не удалось распознать файл как xlsx, возможно файл защищен паролем")
+                            logger.severe("Не удалось открыть файл")
+                            logger.throwing("MailHandler", "processMessage", e)
                             continue
                         } catch (e: Exception) {
                             logger.warning("Не удалось открыть файл")

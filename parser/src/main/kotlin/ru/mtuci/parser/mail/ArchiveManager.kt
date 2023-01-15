@@ -24,9 +24,9 @@ class ArchiveManager {
         logger.info("Unarchive 7z file: ${archiveFile.absolutePath}")
 
         if (!archiveFile.parentFile.exists())
-            archiveFile.parentFile.mkdirs()
-        if (!archiveFile.exists())
-            archiveFile.createNewFile()
+            archiveFile.mkdirs()
+        if (archiveFile.exists())
+            archiveFile.delete()
 
         archiveFile.createNewFile()
         archiveFile.outputStream().use { fileOut ->

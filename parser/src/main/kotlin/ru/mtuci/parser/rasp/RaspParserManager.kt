@@ -2,13 +2,18 @@ package ru.mtuci.parser.rasp
 
 import org.apache.poi.ss.usermodel.Workbook
 import remove
-import ru.mtuci.core.RegularLessonsRepository
+import ru.mtuci.calculators.FilterHashCalculator
+import ru.mtuci.core.CalendarDataRepository
+import ru.mtuci.core.LessonsRepository
+import ru.mtuci.parser.rasp.parsers.RaspParser
 import save
 import java.util.logging.Logger
 
 class RaspParserManager(
-    private val parsers: List<RaspParser>,
-    private val lessonsRepo: RegularLessonsRepository,
+    private val parsers: List<RaspParser<*>>,
+    private val lessonsRepo: LessonsRepository,
+    private val calendarDataRepo: CalendarDataRepository,
+    private val filterHashCalculator: FilterHashCalculator,
 ) {
     fun parseRasp(xss: Workbook, logger: Logger) {
         for (sheet in xss) {
@@ -31,7 +36,7 @@ class RaspParserManager(
                 val to = res.termEndDate ?: lessons.mapNotNull { it.dateTo }.maxOrNull()
 
                 if (group.id != null) {
-                    val oldLessons = lessonsRepo.findRegularLessons(
+                    val oldLessons = lessonsRepo.findLessons(
                         groupId = group.id,
                         from = from,
                         to = to,
@@ -54,6 +59,17 @@ class RaspParserManager(
                         }
                     }
                     trueLesson.save()
+                }
+
+                res.incAllRevisions()
+                calendarDataRepo.findByAnyOf(
+                    res.affectedTeachers.mapNotNull { it.id },
+                    res.afectedDisciplines.mapNotNull { it.id },
+                    res.affectedRooms.mapNotNull { it.id },
+                    listOf(group.id!!)
+                ).forEach {
+                    it.filtersRevisionsHash = filterHashCalculator.getFilterHash(it.searchFilter)
+                    it.save()
                 }
 
             } catch (e: Exception) {

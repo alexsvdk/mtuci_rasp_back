@@ -3,17 +3,18 @@ package ru.mtuci.db
 import com.mongodb.client.MongoDatabase
 import org.bson.conversions.Bson
 import org.litote.kmongo.*
-import ru.mtuci.core.RegularLessonsRepository
-import ru.mtuci.models.LessonType
-import ru.mtuci.models.RegularLesson
-import ru.mtuci.models.RegularLessonsPagination
 import ru.mtuci.calculators.DayLessonsCalculator
+import ru.mtuci.core.LessonsRepository
+import ru.mtuci.models.LessonType
+import ru.mtuci.models.LessonsPagination
+import ru.mtuci.models.lessons.BaseLesson
+import ru.mtuci.models.lessons.RegularLesson
 
-class MongoRegularLessonsRepository(database: MongoDatabase) :
-    MongoBaseRepository<RegularLesson>(database, RegularLesson::class.java),
-    RegularLessonsRepository {
+class MongoLessonsRepository(database: MongoDatabase) :
+    MongoBaseRepository<BaseLesson>(database, BaseLesson::class.java),
+    LessonsRepository {
 
-    override fun findRegularLessons(
+    override fun findLessons(
         groupId: String?,
         teacherId: String?,
         disciplineId: String?,
@@ -23,7 +24,7 @@ class MongoRegularLessonsRepository(database: MongoDatabase) :
         limit: Int,
         from: Long?,
         to: Long?
-    ): RegularLessonsPagination {
+    ): LessonsPagination {
         val filters = mutableListOf<Bson>()
         groupId?.let { filters.add(RegularLesson::groupIds contains it) }
         teacherId?.let { filters.add(RegularLesson::teacherId eq it) }
@@ -35,11 +36,11 @@ class MongoRegularLessonsRepository(database: MongoDatabase) :
 
         val findRes = if (filters.isNotEmpty()) collection.find(and(filters)) else collection.find()
         val total = findRes.count()
-        return RegularLessonsPagination(total, findRes.skip(offset).limit(limit).toList())
+        return LessonsPagination(total, findRes.skip(offset).limit(limit).toList())
     }
 
 
-    override fun findClone(lesson: RegularLesson): RegularLesson? {
+    override fun findClone(lesson: BaseLesson): BaseLesson? {
         return collection.findOne {
             and(
                 RegularLesson::lessonType eq lesson.lessonType,

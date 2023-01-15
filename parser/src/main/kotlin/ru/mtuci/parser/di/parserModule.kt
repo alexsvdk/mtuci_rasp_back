@@ -2,22 +2,26 @@ package ru.mtuci.parser.di
 
 import org.koin.dsl.module
 import ru.mtuci.parser.mail.MailHandler
-import ru.mtuci.parser.rasp.RaspParser
 import ru.mtuci.parser.rasp.RaspParserManager
-import ru.mtuci.parser.rasp.RaspParserV1
+import ru.mtuci.parser.rasp.parsers.ExamParser
+import ru.mtuci.parser.rasp.parsers.RaspParser
+import ru.mtuci.parser.rasp.parsers.RaspParserV1
 
 val parserModule = module {
 
-    single { RaspParserV1(get(), get(), get(), get()) }
-
-    single<List<RaspParser>> {
+    single<List<RaspParser<*>>> {
         listOf(
             get<RaspParserV1>(),
+            get<ExamParser>(),
         )
     }
 
-    single { RaspParserManager(get(), get()) }
+    single { RaspParserManager(get(), get(), get(), get()) }
 
     single { MailHandler(get()) }
+
+    single { RaspParserV1(get(), get()) }
+    single { ExamParser(get()) }
+
 
 }
