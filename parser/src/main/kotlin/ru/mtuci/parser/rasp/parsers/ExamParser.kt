@@ -5,6 +5,7 @@ import ru.mtuci.core.GroupsRepository
 import ru.mtuci.models.lessons.BaseLesson
 import ru.mtuci.parser.rasp.BuildLessonResult
 import ru.mtuci.parser.rasp.RaspParseResult
+import ru.mtuci.parser.rasp.RaspParserConstants
 import java.util.logging.Logger
 
 class ExamParser(
@@ -20,11 +21,13 @@ class ExamParser(
         return isExam && hasGroup
     }
 
-    override fun parse(sheet: Sheet, logger: Logger): RaspParseResult<BaseLesson> {
+    override fun parse(fileName: String, sheet: Sheet, logger: Logger): RaspParseResult<BaseLesson> {
         val year = sheet.getRow(13).getCell(0).stringCellValue
         val title = sheet.getRow(12).getCell(0).stringCellValue
-
-        val group = groupsRepo.findByName(sheet.sheetName) ?: throw Exception("Группа не найдена")
+        val groupName =
+            listOf(fileName, sheet.sheetName).find { RaspParserConstants.groupRex.matches(it) }
+                ?: throw Exception("Группа не найдена")
+        val group = groupsRepo.findByName(groupName) ?: throw Exception("Группа не найдена")
         group.incrementRevision()
 
         val res = mutableListOf<BuildLessonResult<BaseLesson>>()

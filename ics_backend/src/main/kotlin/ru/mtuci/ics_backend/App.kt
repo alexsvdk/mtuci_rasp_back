@@ -32,6 +32,9 @@ fun Application.icsServerModule() {
         level = org.slf4j.event.Level.INFO
     }
     install(StatusPages) {
+        exception<NotFoundException> { call, cause ->
+            call.respond(HttpStatusCode.NotFound, cause.message ?: "Not found")
+        }
         exception<Throwable> { call, cause ->
             cause.printStackTrace()
             call.respondText(text = "500: $cause", status = HttpStatusCode.InternalServerError)

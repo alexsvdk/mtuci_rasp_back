@@ -9,6 +9,7 @@ import ru.mtuci.models.Group
 import ru.mtuci.models.lessons.RegularLesson
 import ru.mtuci.parser.rasp.RaspParseResult
 import ru.mtuci.parser.rasp.RaspParserConstants
+import ru.mtuci.parser.rasp.RaspParserConstants.groupRex
 import save
 import java.util.*
 import java.util.logging.Logger
@@ -22,8 +23,10 @@ class RaspParserV1(
         return str.contains("Расписание", ignoreCase = true)
     }
 
-    override fun parse(sheet: Sheet, logger: Logger): RaspParseResult<RegularLesson> {
-        val group = getGroupByName(sheet.sheetName)
+    override fun parse(fileName: String, sheet: Sheet, logger: Logger): RaspParseResult<RegularLesson> {
+        val groupName =
+            listOf(fileName, sheet.sheetName).find { groupRex.matches(it) } ?: throw Exception("Группа не найдена")
+        val group = getGroupByName(groupName)
         val direction = getDirectionByName(sheet.getRow(10).getCell(0).stringCellValue)
 
         group.directionId = direction.id

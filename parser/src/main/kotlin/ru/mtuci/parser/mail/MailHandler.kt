@@ -3,7 +3,6 @@ package ru.mtuci.parser.mail
 import org.apache.poi.UnsupportedFileFormatException
 import org.apache.poi.ss.usermodel.Workbook
 import org.apache.poi.ss.usermodel.WorkbookFactory
-import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import ru.mtuci.Config
 import ru.mtuci.parser.log.MailLoggerHandler
 import ru.mtuci.parser.rasp.RaspParserManager
@@ -108,12 +107,16 @@ class MailHandler(
 
                 // xlsx
                 if (bodyPart.isMimeType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")) {
-                    raspFound = true
-                    logger.severe("---")
-                    logger.info("Файл: ${MimeUtility.decodeText(bodyPart.fileName)}")
-                    val xss = XSSFWorkbook(bodyPart.inputStream)
-                    raspParserManager.parseRasp(xss, logger)
-                    xss.close()
+                    try {
+                        raspFound = true
+                        logger.severe("---")
+                        logger.info("Файл: ${MimeUtility.decodeText(bodyPart.fileName)}")
+                        val xss = WorkbookFactory.create(bodyPart.inputStream)
+                        raspParserManager.parseRasp(bodyPart.fileName, xss, logger)
+                        xss.close()
+                    } catch (e: Exception) {
+                        logger.warning("Не удалось открыть файл")
+                    }
                 }
 
                 // 7z
@@ -126,9 +129,9 @@ class MailHandler(
                         logger.info("Файл: ${file.name}")
                         var xss: Workbook
                         try {
-                            xss = WorkbookFactory.create(file.inputStream())
+                            xss = WorkbookFactory.create(file)
                         } catch (e: UnsupportedFileFormatException) {
-                            logger.severe("Не удалось открыть файл")
+                            logger.warning("Не удалось открыть файл")
                             logger.throwing("MailHandler", "processMessage", e)
                             continue
                         } catch (e: Exception) {
@@ -137,7 +140,7 @@ class MailHandler(
                             e.printStackTrace()
                             continue
                         }
-                        raspParserManager.parseRasp(xss, logger)
+                        raspParserManager.parseRasp(file.name, xss, logger)
                         xss.close()
                     }
                 }
@@ -168,7 +171,17 @@ class MailHandler(
                         .getRecipients(Message.RecipientType.TO)
                 )
             )
-            reply.setText(log)
+            reply.setContent(
+                """
+                    <html>
+                        <body>
+                            <pre>
+                                $log
+                            </pre>
+                        </body>
+                """.trimIndent(),
+                "text/html; charset=utf-8",
+            )
             reply.replyTo = message.replyTo
             reply.addRecipients(Message.RecipientType.TO, message.from)
 

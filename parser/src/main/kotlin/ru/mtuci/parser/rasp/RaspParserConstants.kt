@@ -11,6 +11,7 @@ object RaspParserConstants {
     val dateFRex = "[0-9]{2}.[0-9]{2}.".toRegex()
     val datePartRex = "[0-9]{2}.[0-9]{2}".toRegex()
     val fioRex = "([a-zA-ZА-Яа-я,ё]*) ([a-zA-ZА-Яа-я,ё])\\.([a-zA-ZА-Яа-я,ё])\\.".toRegex()
+    val groupRex = "([a-zA-ZА-Яа-я,ё]+)([0-9]{4,6})(\\([0-9]{2}\\))*".toRegex()
 
     val yearRex = "([0-9]{4})".toRegex()
 }

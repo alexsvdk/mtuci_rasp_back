@@ -13,18 +13,18 @@ class RaspParserManager(
     private val lessonsRepo: LessonsRepository,
     private val calendarDataRepo: CalendarDataRepository,
 ) {
-    fun parseRasp(xss: Workbook, logger: Logger) {
+    fun parseRasp(fileName: String,xss: Workbook, logger: Logger) {
         for (sheet in xss) {
 
             try {
 
                 val parser = parsers.firstOrNull { it.canParse(sheet) }
-                val res = parser?.parse(sheet, logger)
+                val res = parser?.parse(fileName.substringBefore(".x"),sheet, logger)
 
                 if (res != null) {
-                    logger.info("Найдено занятий: ${res.lessons.size}")
+                    logger.info("${res.group.name}: найдено занятий: ${res.lessons.size}")
                 } else {
-                    logger.info("Не найден парсер для листа ${sheet.sheetName}")
+                    logger.warning("Не найден парсер для листа ${sheet.sheetName}")
                     continue
                 }
 

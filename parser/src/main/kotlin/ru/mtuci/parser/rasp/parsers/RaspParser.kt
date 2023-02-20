@@ -9,6 +9,6 @@ interface RaspParser<T : BaseLesson> {
 
     fun canParse(sheet: Sheet): Boolean
 
-    fun parse(sheet: Sheet, logger: Logger): RaspParseResult<T>
+    fun parse(fileName: String, sheet: Sheet, logger: Logger): RaspParseResult<T>
 
 }
