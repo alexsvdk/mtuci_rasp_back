@@ -8,7 +8,6 @@ dependencies {
     implementation("org.apache.poi:poi:5.2.3")
     implementation("org.apache.poi:poi-ooxml-full:5.2.3")
     implementation("org.apache.poi:poi-scratchpad:5.2.3")
-    implementation("org.apache.poi:poi-ooxml-schemas:5.2.3")
     implementation("org.apache.poi:poi-ooxml:5.2.3")
     implementation("com.sun.mail:javax.mail:1.6.2")
     implementation("org.tukaani:xz:1.9")
