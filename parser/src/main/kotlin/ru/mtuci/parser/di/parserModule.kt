@@ -5,7 +5,7 @@ import ru.mtuci.parser.mail.MailHandler
 import ru.mtuci.parser.rasp.RaspParserManager
 import ru.mtuci.parser.rasp.parsers.ExamParser
 import ru.mtuci.parser.rasp.parsers.RaspParser
-import ru.mtuci.parser.rasp.parsers.RaspParserV1
+import ru.mtuci.parser.rasp.parsers.v1.RaspParserV1
 
 val parserModule = module {
 

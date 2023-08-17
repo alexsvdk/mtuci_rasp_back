@@ -6,6 +6,7 @@ import ru.mtuci.parser.di.parserModule
 import ru.mtuci.parser.mail.MailHandler
 import java.util.logging.Logger
 
+@Suppress("UNREACHABLE_CODE")
 fun main() {
     if (Config.MAIL_USERNAME.isBlank() || Config.MAIL_PASSWORD.isBlank()) {
         throw IllegalArgumentException("Mail username or password is empty")

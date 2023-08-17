@@ -74,7 +74,7 @@ class MailHandler(
                     continue
 
                 if (!message.from.any {
-                        it.toString().contains("@mtuci.ru") || it.toString()
+                        it.toString().endsWith("@mtuci.ru") || it.toString()
                             .contains("alex.svdk@gmail.com")
                     })
 
@@ -106,7 +106,9 @@ class MailHandler(
                 val bodyPart = multipart.getBodyPart(i)
 
                 // xlsx
-                if (bodyPart.isMimeType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")) {
+                if (bodyPart.isMimeType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+                    || bodyPart.isMimeType("application/vnd.ms-excel")
+                ) {
                     try {
                         raspFound = true
                         logger.severe("---")
