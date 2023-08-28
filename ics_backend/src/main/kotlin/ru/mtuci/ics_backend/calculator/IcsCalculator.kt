@@ -8,7 +8,9 @@ import net.fortuna.ical4j.model.TimeZoneRegistry
 import net.fortuna.ical4j.model.TimeZoneRegistryFactory
 import net.fortuna.ical4j.model.component.VEvent
 import net.fortuna.ical4j.model.parameter.Cn
+import net.fortuna.ical4j.model.parameter.CuType
 import net.fortuna.ical4j.model.parameter.PartStat
+import net.fortuna.ical4j.model.parameter.Role
 import net.fortuna.ical4j.model.property.*
 import ru.mtuci.Config
 import ru.mtuci.calculators.DayLessonsCalculator
@@ -59,6 +61,8 @@ class IcsCalculator(
         calendar.add(Version(ParameterList(), "2.0"))
         calendar.add(CalScale(CalScale.VALUE_GREGORIAN))
         calendar.add(tz)
+        calendar.add(RefreshInterval(ParameterList(), "P1D"))
+        calendar.add(Source(ParameterList(), calendarData.getICalFileUrl()))
 
         for (lesson in lessons) {
             val firstLesson = DayLessonsCalculator.calculateFirstLesson(lesson) ?: continue
@@ -76,13 +80,16 @@ class IcsCalculator(
             val event = VEvent(startTemporal, endTemporal, eventName)
 
             // set color
-            event.add(Color(ParameterList(), mapLessonTypeToColor(lesson.lessonType)))
+            mapLessonTypeToColor(lesson.lessonType)?.let { event.add(Color(ParameterList(), it)) }
 
             // set time zone
             event.add(TzId(tzId.id))
 
             //set event id
             event.add(Uid(lesson.id))
+
+            //ser sequence
+            event.add(Sequence(calendarData.filtersRevisionsHash))
 
             //set repeat every two weeks until lastLesson
             val rrule = RRule<Temporal>(
@@ -94,17 +101,27 @@ class IcsCalculator(
             lesson.getRoom()?.let { room ->
                 event.add(Location(room.number))
                 mapRoomToGeo(room)?.let { event.add(it) }
+                val attendee = Attendee("mailto:${room.id}@mtuci.ru")
+                attendee
+                    .withParameter(CuType("ROOM"))
+                    .withParameter(Cn(room.number)).withParameter(PartStat.ACCEPTED)
+                    .withParameter(Role.REQ_PARTICIPANT)
+                event.add(attendee)
             }
 
             // set event participants
             lesson.getTeacher()?.let { teacher ->
-                val attendee = Organizer("mailto:${teacher.id?.last()}@mtuci.ru")
+                val organizer = Organizer("mailto:${teacher.id}@mtuci.ru")
+                event.add(organizer)
+                val attendee = Attendee("mailto:${teacher.id}@mtuci.ru")
                 attendee.withParameter(Cn(teacher.shortName)).withParameter(PartStat.ACCEPTED)
+                    .withParameter(Role.REQ_PARTICIPANT)
                 event.add(attendee)
             }
             lesson.getGroups().forEach { group ->
-                val attendee = Attendee("mailto:${group.id?.last()}@mtuci.ru")
+                val attendee = Attendee("mailto:${group.id}@mtuci.ru")
                 attendee.withParameter(Cn(group.name)).withParameter(PartStat.ACCEPTED)
+                    .withParameter(Role.REQ_PARTICIPANT)
                 event.add(attendee)
             }
 
@@ -140,15 +157,11 @@ class IcsCalculator(
         }
     }
 
-    private fun mapLessonTypeToColor(type: LessonType): String {
+    private fun mapLessonTypeToColor(type: LessonType): String? {
         return when (type) {
-            LECTURE -> "#FF0000"
-            PRACTICE -> "#00FF00"
-            LABORATORY -> "#0000FF"
-            EXAM -> "#FF00FF"
-            UNKNOWN -> "#FF00FF"
-            SPORT -> "#00FFFF"
-            CONSULTATION -> "#FFFF00"
+            EXAM -> "Crimson"
+            CONSULTATION -> "DarkOrange"
+            else -> null
         }
     }
 
