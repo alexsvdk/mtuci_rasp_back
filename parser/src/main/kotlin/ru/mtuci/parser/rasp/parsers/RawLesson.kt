@@ -186,7 +186,7 @@ class RawLesson(
         var nameIter = name!!
         val tags = mutableListOf<String>()
 
-        while (nameIter.contains('(')) {
+        while (nameIter.contains('(') && nameIter.contains(')')) {
             tags.add(nameIter.substringAfter('(').substringBefore(')').trim())
             nameIter = nameIter.substringAfter(')')
         }

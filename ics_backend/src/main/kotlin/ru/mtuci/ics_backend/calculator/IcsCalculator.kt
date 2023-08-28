@@ -79,6 +79,11 @@ class IcsCalculator(
                 .atZone(tzId.toZoneId())
             val event = VEvent(startTemporal, endTemporal, eventName)
 
+            // set description
+            val description = mapLessonTypeToString(lesson.lessonType)
+            if (description.isNotEmpty())
+                event.add(Description(description))
+
             // set color
             mapLessonTypeToColor(lesson.lessonType)?.let { event.add(Color(ParameterList(), it)) }
 
@@ -111,10 +116,8 @@ class IcsCalculator(
 
             // set event participants
             lesson.getTeacher()?.let { teacher ->
-                val organizer = Organizer("mailto:${teacher.id}@mtuci.ru")
-                event.add(organizer)
                 val attendee = Attendee("mailto:${teacher.id}@mtuci.ru")
-                attendee.withParameter(Cn(teacher.shortName)).withParameter(PartStat.ACCEPTED)
+                attendee.withParameter(Cn(teacher.fullName)).withParameter(PartStat.ACCEPTED)
                     .withParameter(Role.REQ_PARTICIPANT)
                 event.add(attendee)
             }
@@ -153,6 +156,18 @@ class IcsCalculator(
             EXAM -> "🔴"
             SPORT -> "🏃"
             CONSULTATION -> "🔵"
+            else -> ""
+        }
+    }
+
+    private fun mapLessonTypeToString(type: LessonType): String {
+        return when (type) {
+            LECTURE -> "Лекция"
+            PRACTICE -> "Практика"
+            LABORATORY -> "Лабораторная"
+            EXAM -> "Экзамен"
+            SPORT -> "Спорт"
+            CONSULTATION -> "Консультация"
             else -> ""
         }
     }

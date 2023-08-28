@@ -132,6 +132,8 @@ class MailHandler(
                         var xss: Workbook
                         try {
                             xss = WorkbookFactory.create(file)
+                            raspParserManager.parseRasp(file.name, xss, logger)
+                            xss.close()
                         } catch (e: UnsupportedFileFormatException) {
                             logger.warning("Не удалось открыть файл")
                             logger.throwing("MailHandler", "processMessage", e)
@@ -142,8 +144,6 @@ class MailHandler(
                             e.printStackTrace()
                             continue
                         }
-                        raspParserManager.parseRasp(file.name, xss, logger)
-                        xss.close()
                     }
                 }
             }
@@ -208,7 +208,8 @@ class MailHandler(
             sentFolder?.open(Folder.READ_WRITE)
             sentFolder?.appendMessages(arrayOf(message))
             sentFolder?.close()
-        } catch (e: Exception) {
+        }
+        catch (e: Exception) {
             e.printStackTrace()
         }
     }
