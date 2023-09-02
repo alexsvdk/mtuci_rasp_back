@@ -74,11 +74,11 @@ class MailHandler(
                     continue
 
                 if (!message.from.any {
-                        it.toString().endsWith("@mtuci.ru") || it.toString()
-                            .contains("alex.svdk@gmail.com")
+                        it.toString().contains("@mtuci.ru") ||
+                                it.toString().contains("alex.svdk@gmail.com")
                     })
-
                     continue
+
                 if (message.flags.contains(Flags.Flag.SEEN))
                     continue
 
@@ -208,8 +208,7 @@ class MailHandler(
             sentFolder?.open(Folder.READ_WRITE)
             sentFolder?.appendMessages(arrayOf(message))
             sentFolder?.close()
-        }
-        catch (e: Exception) {
+        } catch (e: Exception) {
             e.printStackTrace()
         }
     }

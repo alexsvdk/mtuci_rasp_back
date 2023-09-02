@@ -25,6 +25,9 @@ open class BaseLesson : BaseDocument() {
     @GraphQLDescription("Дата начала занятий")
     var dateFrom: Long? = null
 
+    @GraphQLDescription("Дата начала семестра")
+    var termStartDate: Long? = null
+
     @GraphQLDescription("Дата окончания занятий")
     var dateTo: Long? = null
 

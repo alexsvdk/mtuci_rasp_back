@@ -22,7 +22,9 @@ import java.util.*
 
 
 class RawLesson(
-    var day: Int? = null
+    val day: Int? = null,
+    val termStartDate: Long,
+    val termEndDate: Long,
 ) {
 
     /// raw data
@@ -53,6 +55,9 @@ class RawLesson(
             it.dateTo = getEndTime()
             it.roomId = room?.id
             it.tags = getTags()
+            it.termStartDate = termStartDate
+            it.dateFrom = if (it.dateFrom!=null) it.dateFrom else termStartDate
+            it.dateTo = if (it.dateTo!=null) it.dateTo else termEndDate
         }
     }
 

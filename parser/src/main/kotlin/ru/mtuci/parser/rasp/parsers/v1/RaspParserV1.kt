@@ -107,7 +107,7 @@ class RaspParserV1(
 
         for (day in 0..5) for (lessonNum in 0..4) {
             rawLessons.addAll(
-                parseRawLessons(sheet.getRow(rawMeta.raspStartRow + 5 * day + lessonNum), day),
+                parseRawLessons(sheet.getRow(rawMeta.raspStartRow + 5 * day + lessonNum), day, rawMeta.termStartDate, rawMeta.termEndDate,),
             )
         }
 
@@ -116,22 +116,14 @@ class RaspParserV1(
             it.buildRegularLesson()
         }
 
-        val lessons = buildLessonResults.mapNotNull { it.lesson }
-
-        lessons.forEach {
-            it.dateFrom = it.dateFrom ?: rawMeta.termStartDate
-            it.dateTo = it.dateTo ?: rawMeta.termEndDate
-        }
-
-
         return RaspParseResult.fromBuildRes(buildLessonResults, group, rawMeta.termStartDate, rawMeta.termEndDate)
     }
 
-    private fun parseRawLessons(row: Row, day: Int): List<RawLesson> {
+    private fun parseRawLessons(row: Row, day: Int, termStartDate: Long, termEndDate: Long,): List<RawLesson> {
 
         //left
         val raw1 = try {
-            RawLesson(day).apply {
+            RawLesson(day, termStartDate,termEndDate).apply {
                 name = row.getCell(6).stringCellValue.trim()
                 teacher = row.getCell(5).stringCellValue.trim()
                 type = row.getCell(4).stringCellValue.trim()
@@ -144,7 +136,7 @@ class RaspParserV1(
 
         //right
         val raw2 = try {
-            RawLesson(day + 7).apply {
+            RawLesson(day + 7, termStartDate, termEndDate).apply {
                 name = row.getCell(7).stringCellValue.trim()
                 teacher = row.getCell(8).stringCellValue.trim()
                 type = row.getCell(9).stringCellValue.trim()

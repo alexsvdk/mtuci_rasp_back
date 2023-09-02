@@ -1,4 +1,4 @@
-package ru.mtuci.parser.rasp.parsers
+package ru.mtuci.parser.rasp.parsers.exam
 
 import org.apache.poi.ss.usermodel.Sheet
 import ru.mtuci.core.GroupsRepository
@@ -6,6 +6,8 @@ import ru.mtuci.models.lessons.BaseLesson
 import ru.mtuci.parser.rasp.BuildLessonResult
 import ru.mtuci.parser.rasp.RaspParseResult
 import ru.mtuci.parser.rasp.RaspParserConstants
+import ru.mtuci.parser.rasp.parsers.RaspParser
+import ru.mtuci.parser.rasp.parsers.RawLesson
 import java.util.logging.Logger
 
 class ExamParser(

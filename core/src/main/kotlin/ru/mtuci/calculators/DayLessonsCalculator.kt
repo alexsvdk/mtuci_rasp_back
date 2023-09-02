@@ -27,36 +27,32 @@ object DayLessonsCalculator {
     ): List<DayLesson> {
         val dateTo = dateTo ?: Long.MAX_VALUE
         val res = mutableListOf<DayLesson>()
-        val cal = GregorianCalendar(timeZone)
-        cal.firstDayOfWeek = Calendar.MONDAY
 
         for (lesson in regularLesson) {
             val id = lesson.id ?: continue
             if ((lesson.dateFrom ?: continue) > dateTo) continue
             if ((lesson.dateTo ?: continue) < dateFrom) continue
 
-            cal.timeInMillis = lesson.dateFrom!!
-            //Хак чтобы неделя начиланась с понедельника
-            while (cal.get(Calendar.DAY_OF_WEEK) != Calendar.MONDAY) cal.add(Calendar.DATE, 1)
-            cal.set(Calendar.HOUR_OF_DAY, 0)
-            cal.set(Calendar.MINUTE, 0)
-            cal.set(Calendar.SECOND, 0)
-            cal.set(Calendar.MILLISECOND, 0)
-
-            var timezonedCalTime = cal.timeInMillis + cal.timeZone.rawOffset
-
             val dateFrom = maxOf(lesson.dateFrom!!, dateFrom)
             val dateTo = minOf(lesson.dateTo!!, dateTo)
+
+            val firstMonday = LessonDatesCalculator.calculateMonday(dateFrom)
 
             if (lesson is RegularLesson) {
                 for (dateTime in dateFrom..dateTo step dayMs) {
                     val dateWithoutTime = dateTime - dateTime % dayMs
-                    var tweekDay = (((dateWithoutTime - timezonedCalTime) / dayMs) % 14).toInt()
+                    var tweekDay = (((dateWithoutTime - firstMonday) / dayMs) % 14).toInt()
+
+
                     if (tweekDay < -2) {
+                        println("WARNING tweekDay < -2")
+                        /*
                         cal.add(Calendar.WEEK_OF_YEAR, -1)
                         timezonedCalTime = cal.timeInMillis + cal.timeZone.rawOffset
                         tweekDay = (((dateTime - timezonedCalTime) / dayMs) % 14).toInt()
+                         */
                     }
+
 
                     if (tweekDay == lesson.tweekDay) {
 
