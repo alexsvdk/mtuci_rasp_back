@@ -4,8 +4,8 @@ val koinVersion = rootProject.properties["koin_version"]
 val logbackVersion = rootProject.properties["logback_version"]
 
 plugins {
-    id("ru.mtuci.kotlin-library-conventions")
     kotlin("jvm")
+    id("ru.mtuci.kotlin-library-conventions")
 }
 
 dependencies {
@@ -14,8 +14,18 @@ dependencies {
     api("io.insert-koin:koin-core:$koinVersion")
     api("ch.qos.logback:logback-core:$logbackVersion")
     api("ch.qos.logback:logback-classic:$logbackVersion")
-    testApi("io.insert-koin:koin-test:$koinVersion")
+
+    testImplementation("io.insert-koin:koin-test:$koinVersion")
+    testImplementation("io.insert-koin:koin-test-junit5:$koinVersion")
+    testImplementation("org.junit.jupiter:junit-jupiter:+")
 }
+
 repositories {
     mavenCentral()
+}
+
+tasks {
+    test {
+        useJUnitPlatform()
+    }
 }

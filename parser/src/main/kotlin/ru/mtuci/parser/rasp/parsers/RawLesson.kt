@@ -23,8 +23,8 @@ import java.util.*
 
 class RawLesson(
     val day: Int? = null,
-    val termStartDate: Long,
-    val termEndDate: Long,
+    val termStartDate: Long? = null,
+    val termEndDate: Long? = null,
 ) {
 
     /// raw data
