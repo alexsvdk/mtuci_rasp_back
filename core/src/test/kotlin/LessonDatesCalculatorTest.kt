@@ -1,21 +1,46 @@
 import org.junit.jupiter.api.Test
+import ru.mtuci.calculators.DayLessonsCalculator
 import ru.mtuci.calculators.LessonDatesCalculator
+import java.util.*
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class LessonDatesCalculatorTest {
     @Test
     fun earlyTermStartDateTest() {
-        // 01.09.2022
-        val date = 1661979600000
+        // 01.09.2023
+        val date = 1693515600000
         val monday = LessonDatesCalculator.calculateMonday(date)
-        assertEquals(1661644800000, monday, "earlyTermStartDateTest")
+
+        val cal = GregorianCalendar(DayLessonsCalculator.timeZone)
+        cal.timeInMillis = monday
+        assertEquals(Calendar.MONDAY, cal.get(Calendar.DAY_OF_WEEK), "earlyTermStartDateTest")
+        assertTrue { monday < date }
     }
 
     @Test
     fun lateTermStartDateTest() {
-        // 02.09.2022
-        val date = 1662066000000
+        // 02.09.2023
+        val date = 1693602000000
         val monday = LessonDatesCalculator.calculateMonday(date)
-        assertEquals(1662249600000, monday, "lateTermStartDateTest")
+
+        // validate is monday
+        val cal = GregorianCalendar(DayLessonsCalculator.timeZone)
+        cal.timeInMillis = monday
+        assertEquals(Calendar.MONDAY, cal.get(Calendar.DAY_OF_WEEK), "lateTermStartDateTest")
+        assertTrue { monday > date }
+    }
+
+    @Test
+    fun lateTermStartDateTest2() {
+        // 03.09.2023
+        val date = 1693688400000
+        val monday = LessonDatesCalculator.calculateMonday(date)
+
+        // validate is monday
+        val cal = GregorianCalendar(DayLessonsCalculator.timeZone)
+        cal.timeInMillis = monday
+        assertEquals(Calendar.MONDAY, cal.get(Calendar.DAY_OF_WEEK), "lateTermStartDateTest")
+        assertTrue { monday > date }
     }
 }

@@ -15,14 +15,15 @@ object LessonDatesCalculator {
         val cal = GregorianCalendar(DayLessonsCalculator.timeZone)
         cal.firstDayOfWeek = Calendar.MONDAY
         cal.timeInMillis = date
-        val dayOfWeek = cal.get(Calendar.DAY_OF_WEEK)
+        var dayOfWeek = cal.get(Calendar.DAY_OF_WEEK) - 1
+        if (dayOfWeek==0) dayOfWeek = 7
         val isWeekend = dayOfWeek > 5
         cal.add(Calendar.DATE, if (isWeekend) 8-dayOfWeek else -dayOfWeek+1)
         cal.set(Calendar.HOUR_OF_DAY, 0)
         cal.set(Calendar.MINUTE, 0)
         cal.set(Calendar.SECOND, 0)
         cal.set(Calendar.MILLISECOND, 0)
-        return cal.timeInMillis + cal.timeZone.rawOffset
+        return cal.timeInMillis + cal.timeZone.rawOffset + 1
     }
 
     fun calculateLessonStartDate(lesson: BaseLesson) {
